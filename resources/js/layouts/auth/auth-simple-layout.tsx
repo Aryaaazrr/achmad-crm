@@ -1,6 +1,6 @@
 import AppLogoIcon from '@/components/app-logo-icon';
-import { home } from '@/routes';
-import { Link } from '@inertiajs/react';
+// import { home } from '@/routes';
+// import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
 interface AuthLayoutProps {
@@ -14,22 +14,44 @@ export default function AuthSimpleLayout({ children, title, description }: Props
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="w-full max-w-sm">
                 <div className="flex flex-col gap-8">
-                    <div className="flex flex-col items-center gap-4">
-                        <Link href={home()} className="flex flex-col items-center gap-2 font-medium">
-                            <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
+                    <div className="flex flex-col items-center gap-2">
+                        <a href="#" className="flex flex-col items-center gap-2 font-medium">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-md">
                                 <AppLogoIcon className="size-9 fill-current text-[var(--foreground)] dark:text-white" />
                             </div>
                             <span className="sr-only">{title}</span>
-                        </Link>
-
+                        </a>
                         <div className="space-y-2 text-center">
-                            <h1 className="text-xl font-medium">{title}</h1>
+                            <h1 className="text-xl font-bold">{title}</h1>
                             <p className="text-center text-sm text-muted-foreground">{description}</p>
                         </div>
                     </div>
-                    {children}
+            {children}
+            <div className="max-w-sm text-center text-xs text-balance text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+                By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            </div>
                 </div>
             </div>
         </div>
+        // <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+        //     <div className="w-full max-w-sm">
+        //         <div className="flex flex-col gap-8">
+        //             <div className="flex flex-col items-center gap-4">
+        //                 <Link href={home()} className="flex flex-col items-center gap-2 font-medium">
+        //                     <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
+        //                         <AppLogoIcon className="size-9 fill-current text-[var(--foreground)] dark:text-white" />
+        //                     </div>
+        //                     <span className="sr-only">{title}</span>
+        //                 </Link>
+
+        //                 <div className="space-y-2 text-center">
+        //                     <h1 className="text-xl font-medium">{title}</h1>
+        //                     <p className="text-center text-sm text-muted-foreground">{description}</p>
+        //                 </div>
+        //             </div>
+        //             {children}
+        //         </div>
+        //     </div>
+        // </div>
     );
 }
