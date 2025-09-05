@@ -1,8 +1,7 @@
+import { usePage } from '@inertiajs/react';
 import {
     Box,
-    CameraIcon,
-    FileCodeIcon,
-    FileTextIcon,
+    FileChartColumn,
     FolderGit2,
     FolderIcon,
     LayoutDashboardIcon,
@@ -22,120 +21,36 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import AppLogoIcon from './app-logo-icon';
 
 const data = {
-    user: {
-        name: 'shadcn',
-        email: 'm@example.com',
-        avatar: '/avatars/shadcn.jpg',
-    },
     navMain: [
-        {
-            title: 'Dashboard',
-            url: '/dashboard',
-            icon: LayoutDashboardIcon,
-        },
-        {
-            title: 'Product',
-            url: '#',
-            icon: Box,
-        },
-        {
-            title: 'Leads',
-            url: '#',
-            icon: ListIcon,
-        },
-        {
-            title: 'Projects',
-            url: '#',
-            icon: FolderIcon,
-        },
-        {
-            title: 'Customer',
-            url: '#',
-            icon: UserCheck2,
-        },
-    ],
-    navClouds: [
-        {
-            title: 'Capture',
-            icon: CameraIcon,
-            isActive: true,
-            url: '#',
-            items: [
-                {
-                    title: 'Active Proposals',
-                    url: '#',
-                },
-                {
-                    title: 'Archived',
-                    url: '#',
-                },
-            ],
-        },
-        {
-            title: 'Proposal',
-            icon: FileTextIcon,
-            url: '#',
-            items: [
-                {
-                    title: 'Active Proposals',
-                    url: '#',
-                },
-                {
-                    title: 'Archived',
-                    url: '#',
-                },
-            ],
-        },
-        {
-            title: 'Prompts',
-            icon: FileCodeIcon,
-            url: '#',
-            items: [
-                {
-                    title: 'Active Proposals',
-                    url: '#',
-                },
-                {
-                    title: 'Archived',
-                    url: '#',
-                },
-            ],
-        },
+        { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
+        { title: 'Product', url: '#', icon: Box },
+        { title: 'Leads', url: '#', icon: ListIcon },
+        { title: 'Projects', url: '#', icon: FolderIcon },
+        { title: 'Customer', url: '#', icon: UserCheck2 },
+        { title: 'Report', url: '#', icon: FileChartColumn },
     ],
     navSecondary: [
-        {
-            title: 'Settings',
-            url: '/settings/profile',
-            icon: SettingsIcon,
-        },
-        {
-            title: 'Repository',
-            url: 'https://github.com/Aryaaazrr/achmad-crm',
-            icon: FolderGit2,
-        },
+        { title: 'Settings', url: '/settings/profile', icon: SettingsIcon },
+        { title: 'Repository', url: 'https://github.com/Aryaaazrr/achmad-crm', icon: FolderGit2 },
     ],
     settingApplication: [
-        {
-            name: 'Users',
-            url: '/users',
-            icon: UsersIcon,
-        },
-        {
-            name: 'Role',
-            url: '#',
-            icon: Notebook,
-        },
+        { name: 'Users', url: '/users', icon: UsersIcon },
+        { name: 'Role', url: '#', icon: Notebook },
     ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { props: inertiaProps } = usePage();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = (inertiaProps as any).auth?.user;
+
     return (
         <Sidebar collapsible="offcanvas" {...props}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-                            <a href="#">
+                            <a href="/dashboard">
                                 <AppLogoIcon />
                                 <span className="text-base font-semibold">SmartISP</span>
                             </a>
@@ -148,9 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavDocuments items={data.settingApplication} />
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
-            <SidebarFooter>
-                <NavUser user={data.user} />
-            </SidebarFooter>
+            <SidebarFooter>{user && <NavUser user={user} />}</SidebarFooter>
         </Sidebar>
     );
 }
