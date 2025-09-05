@@ -13,7 +13,10 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
+    Route::delete('/users/bulk-destroy', [UserController::class, 'bulkDestroy'])
+    ->name('users.bulk-destroy');
     Route::resource('users', UserController::class);
+
 });
 
 require __DIR__.'/settings.php';
