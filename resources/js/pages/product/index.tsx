@@ -1,4 +1,5 @@
-import { bulkDestroy, create, destroy, edit, showDeleted } from '@/actions/App/Http/Controllers/UserController';
+
+import { bulkDestroy, create, destroy, edit, showDeleted } from '@/actions/App/Http/Controllers/ProductController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -39,21 +40,22 @@ import {
 import { ArrowUpDown, ChevronDown, PencilLine, Trash } from 'lucide-react';
 import * as React from 'react';
 
-type User = {
-    id: number;
+type Product = {
+    id_product: number;
     name: string;
-    email: string;
-    role: string;
+    hpp: number;
+    margin: number;
+    price: number;
     created_at: string;
 };
 
-export default function Users() {
-    const { props } = usePage<{ users: User[] }>();
-    const [localUsers, setLocalUsers] = React.useState<User[]>(props.users);
+export default function Product() {
+    const { props } = usePage<{ product: Product[] }>();
+    const [localProduct, setlocalProduct] = React.useState<Product[]>(props.product);
 
     React.useEffect(() => {
-        setLocalUsers(props.users);
-    }, [props.users]);
+        setlocalProduct(props.product);
+    }, [props.product]);
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -61,7 +63,7 @@ export default function Users() {
     const [rowSelection, setRowSelection] = React.useState({});
     const [globalFilter, setGlobalFilter] = React.useState('');
 
-    const columns: ColumnDef<User>[] = [
+    const columns: ColumnDef<Product>[] = [
         {
             id: 'select',
             header: ({ table }) => (
@@ -91,30 +93,63 @@ export default function Users() {
             cell: ({ row }) => <div className="text-center capitalize">{row.getValue('name')}</div>,
         },
         {
-            accessorKey: 'email',
+            accessorKey: 'hpp',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Email <ArrowUpDown />
+                    Hpp <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="text-center lowercase">{row.getValue('email')}</div>,
+            cell: ({ row }) => {
+                const value = row.getValue('hpp') as number;
+                const formatted = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                }).format(value);
+                return <div className="text-center">{formatted}</div>;
+            },
         },
         {
-            accessorKey: 'role',
+            accessorKey: 'margin',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Role <ArrowUpDown />
+                    Margin <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('role')}</div>,
+            cell: ({ row }) => {
+                const value = parseFloat(row.getValue('margin'));
+                const formatted = `${value}%`;
+                return <div className="text-center">{formatted}</div>;
+            },
+        },
+        {
+            accessorKey: 'price',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="mx-auto flex items-center gap-2"
+                >
+                    Price <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => {
+                const value = row.getValue('price') as number;
+                const formatted = new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0,
+                }).format(value);
+                return <div className="text-center">{formatted}</div>;
+            },
         },
         {
             accessorKey: 'created_at',
@@ -140,10 +175,33 @@ export default function Users() {
             },
         },
         {
+            accessorKey: 'updated_at',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="mx-auto flex items-center gap-2"
+                >
+                    Updated At <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => {
+                const date = new Date(row.getValue('updated_at'));
+                const formatted = new Intl.DateTimeFormat('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                }).format(date);
+                return <div className="text-center">{formatted}</div>;
+            },
+        },
+        {
             id: 'actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const user = row.original;
+                const product = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -152,12 +210,12 @@ export default function Users() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
-                                <Link href={edit(user.id)} className="flex w-full items-center gap-2">
+                                <Link href={edit(product.id_product)} className="flex w-full items-center gap-2">
                                     <PencilLine className="h-4 w-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={destroy(user.id)} className="flex w-full items-center gap-2">
+                                <Link href={destroy(product.id_product)} className="flex w-full items-center gap-2">
                                     <Trash className="h-4 w-4" /> Delete
                                 </Link>
                             </DropdownMenuItem>
@@ -169,7 +227,7 @@ export default function Users() {
     ];
 
     const table = useReactTable({
-        data: localUsers,
+        data: localProduct,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -190,14 +248,14 @@ export default function Users() {
     });
 
     const handleDeleteSelected = () => {
-        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
+        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id_product);
         if (selectedIds.length === 0) return;
 
         router.delete(bulkDestroy(), {
             data: { ids: selectedIds },
             preserveScroll: true,
             onSuccess: () => {
-                setLocalUsers((prev) => prev.filter((user) => !selectedIds.includes(user.id)));
+                setlocalProduct((prev) => prev.filter((product) => !selectedIds.includes(product.id_product)));
                 setRowSelection({});
             },
         });
@@ -206,7 +264,7 @@ export default function Users() {
     return (
         <AppLayout>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 px-4">
-                <h1 className="text-xl font-black">Users Data</h1>
+                <h1 className="text-xl font-black">Product Data</h1>
                 <div className="flex gap-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -216,8 +274,8 @@ export default function Users() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} user(s)?</AlertDialogTitle>
-                                <AlertDialogDescription>The user(s) will be deleted and can still be restored within 30 days.</AlertDialogDescription>
+                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} products?</AlertDialogTitle>
+                                <AlertDialogDescription>The products will be deleted and can still be restored within 30 days.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>

@@ -11,9 +11,6 @@ interface User {
     id: number;
     name: string;
     email: string;
-    email_verified_at?: string;
-    created_at: string;
-    updated_at: string;
 }
 
 interface Props {
@@ -67,36 +64,13 @@ export default function UsersEdit({ user }: Props) {
                                     />
                                     <InputError message={errors.email} />
                                 </div>
-                                <div className="flex flex-wrap space-y-2">
-                                    <Label>New Password (Optional)</Label>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        name="password"
-                                        tabIndex={3}
-                                        autoComplete="new-password"
-                                        placeholder="Leave blank to keep current password"
-                                    />
-                                    <InputError message={errors.password} />
-                                </div>
-                                <div className="flex flex-wrap space-y-2">
-                                    <Label>Confirm New Password</Label>
-                                    <Input
-                                        id="password_confirmation"
-                                        type="password"
-                                        name="password_confirmation"
-                                        tabIndex={4}
-                                        autoComplete="new-password"
-                                        placeholder="Confirm new password"
-                                    />
-                                    <InputError message={errors.password_confirmation} />
-                                </div>
 
                                 <div className="col-span-2 flex justify-center md:justify-end">
                                     <Button
                                         type="submit"
                                         className="w-full cursor-pointer bg-amber-500 hover:bg-amber-600 md:w-1/2"
                                         disabled={processing}
+                                        tabIndex={4}
                                     >
                                         {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                                         {processing ? 'Updating...' : 'Update User'}

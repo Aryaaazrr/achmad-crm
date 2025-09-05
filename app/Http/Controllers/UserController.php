@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -15,7 +16,13 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::select('id', 'name', 'email')->whereNot('id', Auth::user()->id)->get();
+        $users = User::with('roles')->whereNot('id', Auth::user()->id)->get();
+
+        $users->transform(function ($user) {
+            $user->role = $user->roles->pluck('name')->first() ?? 'No Role';
+            unset($user->roles);
+            return $user;
+        })->toArray();
 
         return Inertia::render('users/index', ['users' => $users]);
     }
@@ -25,7 +32,11 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('users/create');
+        $roles = Role::all();
+
+        return Inertia::render('users/create', [
+            'roles' => $roles
+        ]);
     }
 
     /**
@@ -37,24 +48,19 @@ class UserController extends Controller
             'name'              => ['required', 'string', 'min:2', 'max:255'],
             'email'             => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password'          => ['required', 'string', 'min:6', 'confirmed'],
+            'role'          => ['required', 'string', 'exists:roles,name'],
         ]);
 
-        User::create([
+        $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
         ]);
 
+        $user->assignRole($validated['role']);
+
         return redirect()->route('users.index')
                      ->with('success', 'User has been created successfully');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
     }
 
     /**
@@ -63,9 +69,11 @@ class UserController extends Controller
     public function edit(string $id)
     {
         $user = User::findOrFail($id);
+        $roles = Role::all();
 
         return Inertia::render('users/edit', [
-            'user' => $user
+            'user' => $user,
+            'roles' => $roles
         ]);
     }
 
@@ -79,7 +87,6 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string', 'min:6', 'confirmed'],
         ]);
 
         $user->name = $validated['name'];
@@ -116,6 +123,36 @@ class UserController extends Controller
             User::whereIn('id', $ids)->delete();
         }
 
-        return back()->with('success', count($ids) . ' users deleted successfully.');
+        return back()->with('success', count($ids) . ' User deleted successfully.');
+    }
+
+    public function showDeleted()
+    {
+        $users = User::with('roles')->onlyTrashed()->get();
+
+        $users->transform(function ($user) {
+            $user->role = $user->roles->pluck('name')->first() ?? 'No Role';
+            unset($user->roles);
+            return $user;
+        })->toArray();
+
+        return Inertia::render('users/deleted', ['users' => $users]);
+    }
+
+    public function restore($id)
+    {
+        User::withTrashed()->find($id)->restore();
+        return back()->with('success', 'User restored successfully.');
+    }
+
+    public function forceDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+
+        if (!empty($ids)) {
+            User::whereIn('id', $ids)->forceDelete();
+        }
+
+        return back()->with('success', count($ids) . ' Users has been successfully deleted permanently.');
     }
 }

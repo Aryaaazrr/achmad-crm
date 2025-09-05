@@ -1,19 +1,23 @@
-import UserController from '@/actions/App/Http/Controllers/UserController';
+import UserController, { index } from '@/actions/App/Http/Controllers/UserController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { Form, router } from '@inertiajs/react';
+import { Form, Link, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 export default function UsersCreate() {
+    const { props } = usePage<{ roles: { id: number; name: string }[] }>();
+    const roles = props.roles;
+
     return (
         <AppLayout>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 p-4">
                 <h1 className="text-xl font-black">Create Users</h1>
-                <Button variant={'destructive'} className="cursor-pointer hover:bg-red-500 dark:text-white" onClick={() => router.visit('/users')}>
-                    Back
+                <Button asChild variant={'destructive'} className="cursor-pointer dark:text-white">
+                    <Link href={index()}>Back</Link>
                 </Button>
             </div>
             <div className="mx-6 h-full rounded-xl bg-muted/50 p-4">
@@ -77,9 +81,25 @@ export default function UsersCreate() {
                                     />
                                     <InputError message={errors.password_confirmation} />
                                 </div>
+                                <div className="flex flex-col space-y-2">
+                                    <Label htmlFor="role">Role</Label>
+                                    <Select name="role" required>
+                                        <SelectTrigger tabIndex={5} className='w-full'>
+                                            <SelectValue placeholder="-- Select Role --" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {roles.map((role) => (
+                                                <SelectItem key={role.id} value={role.name}>
+                                                    {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.role} />
+                                </div>
 
                                 <div className="col-span-2 flex justify-center md:justify-end">
-                                    <Button type="submit" className="w-full cursor-pointer md:w-1/2" disabled={processing}>
+                                    <Button type="submit" tabIndex={5} className="w-full cursor-pointer md:w-1/2" disabled={processing}>
                                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                         Submit
                                     </Button>

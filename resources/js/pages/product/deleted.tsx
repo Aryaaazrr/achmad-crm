@@ -1,4 +1,4 @@
-import { bulkDestroy, create, destroy, edit, showDeleted } from '@/actions/App/Http/Controllers/UserController';
+import { index, restore } from '@/actions/App/Http/Controllers/ProductController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { forceDelete } from '@/routes/product';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
@@ -36,24 +37,155 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, PencilLine, Trash } from 'lucide-react';
+import { ArchiveRestore, ArrowUpDown, ChevronDown } from 'lucide-react';
 import * as React from 'react';
 
-type User = {
-    id: number;
+export type Product = {
+    id_product: number;
     name: string;
-    email: string;
-    role: string;
+    hpp: number;
+    margin: number;
+    price: number;
     created_at: string;
 };
 
-export default function Users() {
-    const { props } = usePage<{ users: User[] }>();
-    const [localUsers, setLocalUsers] = React.useState<User[]>(props.users);
+export const columns: ColumnDef<Product>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
+        accessorKey: 'name',
+        header: ({ column }) => (
+            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')} className="mx-auto flex items-center gap-2">
+                Name <ArrowUpDown />
+            </Button>
+        ),
+        cell: ({ row }) => <div className="text-center capitalize">{row.getValue('name')}</div>,
+    },
+    {
+        accessorKey: 'hpp',
+        header: ({ column }) => (
+            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')} className="mx-auto flex items-center gap-2">
+                Hpp <ArrowUpDown />
+            </Button>
+        ),
+        cell: ({ row }) => {
+            const value = row.getValue('hpp') as number;
+            const formatted = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+            }).format(value);
+            return <div className="text-center">{formatted}</div>;
+        },
+    },
+    {
+        accessorKey: 'margin',
+        header: ({ column }) => (
+            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')} className="mx-auto flex items-center gap-2">
+                Margin <ArrowUpDown />
+            </Button>
+        ),
+        cell: ({ row }) => {
+            const value = parseFloat(row.getValue('margin'));
+            const formatted = `${value}%`;
+            return <div className="text-center">{formatted}</div>;
+        },
+    },
+    {
+        accessorKey: 'price',
+        header: ({ column }) => (
+            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')} className="mx-auto flex items-center gap-2">
+                Price <ArrowUpDown />
+            </Button>
+        ),
+        cell: ({ row }) => {
+            const value = row.getValue('price') as number;
+            const formatted = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+            }).format(value);
+            return <div className="text-center">{formatted}</div>;
+        },
+    },
+    {
+        accessorKey: 'created_at',
+        header: ({ column }) => (
+            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')} className="mx-auto flex items-center gap-2">
+                Created At <ArrowUpDown />
+            </Button>
+        ),
+        cell: ({ row }) => {
+            const date = new Date(row.getValue('created_at'));
+            const formatted = new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).format(date);
+            return <div className="text-center">{formatted}</div>;
+        },
+    },
+    {
+        accessorKey: 'deleted_at',
+        header: ({ column }) => (
+            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')} className="mx-auto flex items-center gap-2">
+                Deleted At <ArrowUpDown />
+            </Button>
+        ),
+        cell: ({ row }) => {
+            const date = new Date(row.getValue('deleted_at'));
+            const formatted = new Intl.DateTimeFormat('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).format(date);
+            return <div className="text-center">{formatted}</div>;
+        },
+    },
+    {
+        id: 'actions',
+        enableHiding: false,
+        cell: ({ row }) => {
+            const product = row.original;
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="p-2">⋮</button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                            <Link href={restore(product.id_product)} className="flex w-full items-center gap-2">
+                                <ArchiveRestore className="h-4 w-4" /> Restore
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
+    },
+];
 
-    React.useEffect(() => {
-        setLocalUsers(props.users);
-    }, [props.users]);
+export default function Product() {
+    const { props } = usePage<{ product: Product[] }>();
+    const [localProduct, setlocalProduct] = React.useState<Product[]>(props.product);
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -61,115 +193,8 @@ export default function Users() {
     const [rowSelection, setRowSelection] = React.useState({});
     const [globalFilter, setGlobalFilter] = React.useState('');
 
-    const columns: ColumnDef<User>[] = [
-        {
-            id: 'select',
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-        {
-            accessorKey: 'name',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="mx-auto flex items-center gap-2"
-                >
-                    Name <ArrowUpDown />
-                </Button>
-            ),
-            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('name')}</div>,
-        },
-        {
-            accessorKey: 'email',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="mx-auto flex items-center gap-2"
-                >
-                    Email <ArrowUpDown />
-                </Button>
-            ),
-            cell: ({ row }) => <div className="text-center lowercase">{row.getValue('email')}</div>,
-        },
-        {
-            accessorKey: 'role',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="mx-auto flex items-center gap-2"
-                >
-                    Role <ArrowUpDown />
-                </Button>
-            ),
-            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('role')}</div>,
-        },
-        {
-            accessorKey: 'created_at',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="mx-auto flex items-center gap-2"
-                >
-                    Created At <ArrowUpDown />
-                </Button>
-            ),
-            cell: ({ row }) => {
-                const date = new Date(row.getValue('created_at'));
-                const formatted = new Intl.DateTimeFormat('id-ID', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }).format(date);
-                return <div className="text-center">{formatted}</div>;
-            },
-        },
-        {
-            id: 'actions',
-            enableHiding: false,
-            cell: ({ row }) => {
-                const user = row.original;
-                return (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="p-2">⋮</button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                                <Link href={edit(user.id)} className="flex w-full items-center gap-2">
-                                    <PencilLine className="h-4 w-4" /> Edit
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={destroy(user.id)} className="flex w-full items-center gap-2">
-                                    <Trash className="h-4 w-4" /> Delete
-                                </Link>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                );
-            },
-        },
-    ];
-
     const table = useReactTable({
-        data: localUsers,
+        data: localProduct,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -189,15 +214,19 @@ export default function Users() {
         },
     });
 
+    React.useEffect(() => {
+        setlocalProduct(props.product);
+    }, [props.product]);
+
     const handleDeleteSelected = () => {
-        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
+        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id_product);
         if (selectedIds.length === 0) return;
 
-        router.delete(bulkDestroy(), {
+        router.delete(forceDelete(), {
             data: { ids: selectedIds },
             preserveScroll: true,
             onSuccess: () => {
-                setLocalUsers((prev) => prev.filter((user) => !selectedIds.includes(user.id)));
+                setlocalProduct((prev) => prev.filter((product) => !selectedIds.includes(product.id_product)));
                 setRowSelection({});
             },
         });
@@ -206,18 +235,20 @@ export default function Users() {
     return (
         <AppLayout>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 px-4">
-                <h1 className="text-xl font-black">Users Data</h1>
+                <h1 className="text-xl font-black">Trash Product Data</h1>
                 <div className="flex gap-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={table.getSelectedRowModel().rows.length === 0}>
-                                Delete
+                            <Button variant="destructive" className="cursor-pointer" disabled={table.getSelectedRowModel().rows.length === 0}>
+                                Delete Permanent
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} user(s)?</AlertDialogTitle>
-                                <AlertDialogDescription>The user(s) will be deleted and can still be restored within 30 days.</AlertDialogDescription>
+                                <AlertDialogTitle>Yakin hapus product?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Tindakan ini akan menghapus {table.getSelectedRowModel().rows.length} product secara permanen.
+                                </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -227,11 +258,8 @@ export default function Users() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <Button asChild variant="default" className="cursor-pointer bg-amber-500 hover:bg-amber-600 dark:text-white">
-                        <Link href={showDeleted()}>Recovery</Link>
-                    </Button>
                     <Button asChild className="cursor-pointer dark:text-white">
-                        <Link href={create()}>Create</Link>
+                        <Link href={index()}>Back</Link>
                     </Button>
                 </div>
             </div>

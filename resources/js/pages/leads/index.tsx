@@ -1,4 +1,4 @@
-import { bulkDestroy, create, destroy, edit, showDeleted } from '@/actions/App/Http/Controllers/UserController';
+import { bulkDestroy, create, destroy, edit } from '@/actions/App/Http/Controllers/LeadsController';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -10,6 +10,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -36,24 +37,39 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, PencilLine, Trash } from 'lucide-react';
+import { ArrowUpDown, Ban, CheckCircle2Icon, ChevronDown, Handshake, LoaderIcon, PencilLine, PhoneCall, Trash } from 'lucide-react';
 import * as React from 'react';
 
 type User = {
     id: number;
     name: string;
-    email: string;
-    role: string;
-    created_at: string;
 };
 
-export default function Users() {
-    const { props } = usePage<{ users: User[] }>();
-    const [localUsers, setLocalUsers] = React.useState<User[]>(props.users);
+type Leads = {
+    id_leads: number;
+    name: string;
+    contact: string;
+    address: string;
+    needs: string;
+    status: 'new' | 'contacted' | 'negotiation' | 'deal' | 'cancel';
+    id_user: number;
+    created_at: string;
+    updated_at: string;
+    user?: User;
+};
+
+type Auth = {
+    permissions: string[];
+};
+
+export default function Leads({ auth }: { auth: Auth }) {
+    const { props } = usePage<{ leads: Leads[] }>();
+    const [localLeads, setlocalLeads] = React.useState<Leads[]>(props.leads);
+    const canCreate = auth.permissions.includes('leads-create');
 
     React.useEffect(() => {
-        setLocalUsers(props.users);
-    }, [props.users]);
+        setlocalLeads(props.leads);
+    }, [props.leads]);
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -61,7 +77,7 @@ export default function Users() {
     const [rowSelection, setRowSelection] = React.useState({});
     const [globalFilter, setGlobalFilter] = React.useState('');
 
-    const columns: ColumnDef<User>[] = [
+    const columns: ColumnDef<Leads>[] = [
         {
             id: 'select',
             header: ({ table }) => (
@@ -91,30 +107,88 @@ export default function Users() {
             cell: ({ row }) => <div className="text-center capitalize">{row.getValue('name')}</div>,
         },
         {
-            accessorKey: 'email',
+            accessorKey: 'contact',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Email <ArrowUpDown />
+                    Contact <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="text-center lowercase">{row.getValue('email')}</div>,
+            cell: ({ row }) => {
+                let value = row.getValue('contact') as string;
+
+                value = value?.toString().replace(/\D/g, '');
+
+                if (value.startsWith('0')) {
+                    value = '+62' + value.slice(1);
+                }
+
+                const formatted = value.replace(/(\+62)(\d{3})(\d{4})(\d+)/, '$1-$2-$3-$4');
+
+                return <div className="text-center">{formatted}</div>;
+            },
         },
         {
-            accessorKey: 'role',
+            accessorKey: 'address',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Role <ArrowUpDown />
+                    Address <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('role')}</div>,
+            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('address')}</div>,
+        },
+        {
+            accessorKey: 'needs',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="mx-auto flex items-center gap-2"
+                >
+                    Needs <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('needs')}</div>,
+        },
+        {
+            accessorKey: 'status',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="mx-auto flex items-center gap-2"
+                >
+                    Status <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <div className="flex justify-center">
+                    <Badge variant="outline" className="flex gap-1 px-1.5 text-muted-foreground [&_svg]:size-3">
+                        {row.original.status === 'deal' ? <CheckCircle2Icon className="text-green-500 dark:text-green-400" /> : row.original.status === 'contacted' ? <PhoneCall className="text-emerald-500 dark:text-emerald-400" /> : row.original.status === 'negotiation' ? <Handshake className="text-amber-500 dark:text-amber-400" /> : row.original.status === 'cancel' ? <Ban className="text-red-500 dark:text-red-400" /> : <LoaderIcon />}
+                        {row.original.status}
+                    </Badge>
+                </div>
+            ),
+        },
+        {
+            id: 'sales_name',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="mx-auto flex items-center gap-2"
+                >
+                    Sales Name <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => <div className="text-center capitalize">{row.original.user?.name ?? '-'}</div>,
         },
         {
             accessorKey: 'created_at',
@@ -140,10 +214,33 @@ export default function Users() {
             },
         },
         {
+            accessorKey: 'updated_at',
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+                    className="mx-auto flex items-center gap-2"
+                >
+                    Updated At <ArrowUpDown />
+                </Button>
+            ),
+            cell: ({ row }) => {
+                const date = new Date(row.getValue('updated_at'));
+                const formatted = new Intl.DateTimeFormat('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                }).format(date);
+                return <div className="text-center">{formatted}</div>;
+            },
+        },
+        {
             id: 'actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const user = row.original;
+                const leads = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -152,15 +249,17 @@ export default function Users() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
-                                <Link href={edit(user.id)} className="flex w-full items-center gap-2">
+                                <Link href={edit(leads.id_leads)} className="flex w-full items-center gap-2">
                                     <PencilLine className="h-4 w-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={destroy(user.id)} className="flex w-full items-center gap-2">
-                                    <Trash className="h-4 w-4" /> Delete
-                                </Link>
-                            </DropdownMenuItem>
+                            {canCreate && (
+                                <DropdownMenuItem asChild>
+                                    <Link href={destroy(leads.id_leads)} className="flex w-full items-center gap-2">
+                                        <Trash className="h-4 w-4" /> Delete
+                                    </Link>
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
@@ -169,7 +268,7 @@ export default function Users() {
     ];
 
     const table = useReactTable({
-        data: localUsers,
+        data: localLeads,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -190,14 +289,14 @@ export default function Users() {
     });
 
     const handleDeleteSelected = () => {
-        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
+        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id_leads);
         if (selectedIds.length === 0) return;
 
         router.delete(bulkDestroy(), {
             data: { ids: selectedIds },
             preserveScroll: true,
             onSuccess: () => {
-                setLocalUsers((prev) => prev.filter((user) => !selectedIds.includes(user.id)));
+                setlocalLeads((prev) => prev.filter((leads) => !selectedIds.includes(leads.id_leads)));
                 setRowSelection({});
             },
         });
@@ -206,40 +305,43 @@ export default function Users() {
     return (
         <AppLayout>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 px-4">
-                <h1 className="text-xl font-black">Users Data</h1>
+                <h1 className="text-xl font-black">Leads Data</h1>
                 <div className="flex gap-2">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" disabled={table.getSelectedRowModel().rows.length === 0}>
-                                Delete
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} user(s)?</AlertDialogTitle>
-                                <AlertDialogDescription>The user(s) will be deleted and can still be restored within 30 days.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">
-                                    Hapus
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button asChild variant="default" className="cursor-pointer bg-amber-500 hover:bg-amber-600 dark:text-white">
-                        <Link href={showDeleted()}>Recovery</Link>
-                    </Button>
-                    <Button asChild className="cursor-pointer dark:text-white">
-                        <Link href={create()}>Create</Link>
-                    </Button>
+                    {canCreate && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" disabled={table.getSelectedRowModel().rows.length === 0}>
+                                    Delete
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} leads?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        The leads will be deleted permanently and can not be restored again.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">
+                                        Hapus
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                    {canCreate && (
+                        <Button asChild className="cursor-pointer dark:text-white">
+                            <Link href={create()}>Create</Link>
+                        </Button>
+                    )}
                 </div>
             </div>
 
             <div className="mx-6 h-full rounded-xl bg-muted/50 p-4">
                 <div className="flex items-center py-4">
                     <Input
-                        placeholder="Search users..."
+                        placeholder="Search data..."
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(String(e.target.value))}
                         className="max-w-sm"

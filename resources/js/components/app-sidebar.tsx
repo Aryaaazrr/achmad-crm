@@ -6,7 +6,6 @@ import {
     FolderIcon,
     LayoutDashboardIcon,
     ListIcon,
-    Notebook,
     SettingsIcon,
     UserCheck2,
     UsersIcon,
@@ -23,19 +22,18 @@ import AppLogoIcon from './app-logo-icon';
 const data = {
     navMain: [
         { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
-        { title: 'Product', url: '#', icon: Box },
-        { title: 'Leads', url: '#', icon: ListIcon },
-        { title: 'Projects', url: '#', icon: FolderIcon },
-        { title: 'Customer', url: '#', icon: UserCheck2 },
-        { title: 'Report', url: '#', icon: FileChartColumn },
+        { title: 'Product', url: '/product', icon: Box },
+        { title: 'Leads', url: '/leads', icon: ListIcon },
+        { title: 'Projects', url: '/project', icon: FolderIcon },
+        { title: 'Customer', url: '/customer', icon: UserCheck2 },
+        { title: 'Report', url: '/report', icon: FileChartColumn },
     ],
     navSecondary: [
-        { title: 'Settings', url: '/settings/profile', icon: SettingsIcon },
         { title: 'Repository', url: 'https://github.com/Aryaaazrr/achmad-crm', icon: FolderGit2 },
     ],
     settingApplication: [
         { name: 'Users', url: '/users', icon: UsersIcon },
-        { name: 'Role', url: '#', icon: Notebook },
+        { name: 'Setting', url: '/settings/profile', icon: SettingsIcon },
     ],
 };
 
