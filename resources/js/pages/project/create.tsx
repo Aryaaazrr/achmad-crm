@@ -324,7 +324,7 @@ export default function ProjectCreate({ leads, products }: Props) {
                                                                     <input
                                                                         type="hidden"
                                                                         name={`products[${index}][id_product]`}
-                                                                        value={productDetails[product.id_product]?.quantity || 1}
+                                                                        value={product.id_product}
                                                                     />
                                                                     <input
                                                                         type="hidden"
@@ -383,8 +383,8 @@ export default function ProjectCreate({ leads, products }: Props) {
 
                                 {/* Right Column - Summary Sidebar */}
                                 <div className="lg:col-span-1">
-                                    <Card className="border-2 shadow-lg p-0">
-                                        <CardHeader className="rounded-t-lg bg-gradient-to-r from-primary to-blue-700 text-white p-4">
+                                    <Card className="border-2 p-0 shadow-lg">
+                                        <CardHeader className="rounded-t-lg bg-gradient-to-r from-primary to-blue-700 p-4 text-white">
                                             <CardTitle className="flex items-center gap-2">
                                                 <Calculator className="h-5 w-5" />
                                                 Project Summary

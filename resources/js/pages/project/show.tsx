@@ -5,11 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
-import { Calculator, CheckCircle, FileText, MapPin, Package, Phone, ShoppingCart, Target, Trash2, User } from 'lucide-react';
+import { Calculator, CheckCircle, FileText, MapPin, Package, Phone, ShoppingCart, Target, User } from 'lucide-react';
 import React from 'react';
 
 interface Lead {
@@ -68,14 +67,6 @@ export default function ProjectShow({ project, leads, products, detailProducts }
                 },
             };
             return updated;
-        });
-    };
-
-    const removeProduct = (productId: number) => {
-        setProductDetails((prev) => {
-            const newDetails = { ...prev };
-            delete newDetails[productId];
-            return newDetails;
         });
     };
 
@@ -228,15 +219,6 @@ export default function ProjectShow({ project, leads, products, detailProducts }
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => removeProduct(product.id_product)}
-                                                                className="text-red-500 hover:bg-red-50 hover:text-red-700"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
                                                         </div>
 
                                                         <div className="grid grid-cols-3 gap-3">
