@@ -15,10 +15,6 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
     Route::middleware('role:'. User::ROLE_MANAGER)->group(function () {
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('trash', [UserController::class, 'showDeleted'])->name('trash.index');
@@ -67,8 +63,10 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
-    Route::resource('customer', CustomerController::class);
-    Route::resource('report', ReportController::class);
+    Route::resource('customer', CustomerController::class)->only(['index', 'show']);
+
+    Route::get('report', [ReportController::class, 'index'])->name('report.index');
+    Route::get('report/export', [ReportController::class, 'export'])->name('report.export');
 });
 
 require __DIR__.'/settings.php';

@@ -4,7 +4,6 @@ import {
     FileChartColumn,
     FolderGit2,
     FolderIcon,
-    LayoutDashboardIcon,
     ListIcon,
     SettingsIcon,
     UserCheck2,
@@ -19,28 +18,50 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import AppLogoIcon from './app-logo-icon';
 
-const data = {
-    navMain: [
-        { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
-        { title: 'Product', url: '/product', icon: Box },
-        { title: 'Leads', url: '/leads', icon: ListIcon },
-        { title: 'Projects', url: '/project', icon: FolderIcon },
-        { title: 'Customer', url: '/customer', icon: UserCheck2 },
-        { title: 'Report', url: '/report', icon: FileChartColumn },
-    ],
-    navSecondary: [
-        { title: 'Repository', url: 'https://github.com/Aryaaazrr/achmad-crm', icon: FolderGit2 },
-    ],
-    settingApplication: [
-        { name: 'Users', url: '/users', icon: UsersIcon },
-        { name: 'Setting', url: '/settings/profile', icon: SettingsIcon },
-    ],
-};
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { props: inertiaProps } = usePage();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = (inertiaProps as any).auth?.user;
+    const userRole = user?.role;
+
+    const baseNavMain = [
+        { title: 'Leads', url: '/leads', icon: ListIcon },
+        { title: 'Projects', url: '/project', icon: FolderIcon },
+        { title: 'Customer', url: '/customer', icon: UserCheck2 },
+        { title: 'Report', url: '/report', icon: FileChartColumn },
+    ];
+
+    const adminOnlyNavMain = [
+        { title: 'Product', url: '/product', icon: Box },
+    ];
+
+    const navMain = userRole === 'manager'
+        ? [
+            baseNavMain[0],
+            ...adminOnlyNavMain,
+            ...baseNavMain.slice(1)
+          ]
+        : baseNavMain;
+
+    const baseSettingItems = [
+        { name: 'Setting', url: '/settings/profile', icon: SettingsIcon },
+    ];
+
+    const adminOnlySettingItems = [
+        { name: 'Users', url: '/users', icon: UsersIcon },
+    ];
+
+    const settingApplication = userRole === 'admin'
+        ? [...adminOnlySettingItems, ...baseSettingItems]
+        : baseSettingItems;
+
+    const data = {
+        navMain,
+        navSecondary: [
+            { title: 'Repository', url: 'https://github.com/Aryaaazrr/achmad-crm', icon: FolderGit2 },
+        ],
+        settingApplication,
+    };
 
     return (
         <Sidebar collapsible="offcanvas" {...props}>

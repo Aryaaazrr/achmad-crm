@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\Leads;
 use App\Models\Product;
 use App\Models\Project;
@@ -29,10 +30,12 @@ class ProjectSeeder extends Seeder
         foreach ($leads as $lead) {
             $salesId = $lead->id_user;
 
+            $projectStatus = $statuses[array_rand($statuses)];
+
             $project = Project::create([
                 'id_lead' => $lead->id_leads,
                 'id_user' => $salesId,
-                'status'  => $statuses[array_rand($statuses)],
+                'status'  => $projectStatus,
                 'total_price' => 0,
             ]);
 
@@ -54,6 +57,13 @@ class ProjectSeeder extends Seeder
             }
 
             $project->update(['total_price' => $totalPrice]);
+
+            if ($projectStatus === 'approved') {
+                Customer::create([
+                    'id_leads' => $lead->id_leads,
+                    'status'   => 'active',
+                ]);
+            }
         }
     }
 }
