@@ -49,6 +49,7 @@ class ProjectSeeder extends Seeder
                     'id_product' => $product->id_product,
                     'quantity'   => $quantity,
                     'price'      => $price,
+                    'subtotal'      => $price * $quantity,
                 ]);
             }
 

@@ -40,30 +40,31 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('leads')->name('leads.')->group(function () {
-        Route::get('/', [LeadsController::class, 'index'])->name('index');
-        Route::get('/{id}/edit', [LeadsController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [LeadsController::class, 'update'])->name('update');
-
         Route::middleware('role:' . User::ROLE_SALES)->group(function () {
             Route::get('/create', [LeadsController::class, 'create'])->name('create');
             Route::post('/', [LeadsController::class, 'store'])->name('store');
             Route::delete('/', [LeadsController::class, 'bulkDestroy'])->name('bulk-destroy');
             Route::delete('/{id}', [LeadsController::class, 'destroy'])->name('destroy');
         });
+
+        Route::get('/', [LeadsController::class, 'index'])->name('index');
+        Route::get('/{id}/edit', [LeadsController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [LeadsController::class, 'update'])->name('update');
     });
 
     Route::prefix('project')->name('project.')->group(function () {
-        Route::get('/', [ProjectController::class, 'index'])->name('index');
-        Route::get('/{id}', [ProjectController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [ProjectController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ProjectController::class, 'update'])->name('update');
-
         Route::middleware('role:' . User::ROLE_SALES)->group(function () {
             Route::get('/create', [ProjectController::class, 'create'])->name('create');
             Route::post('/', [ProjectController::class, 'store'])->name('store');
             Route::delete('/', [ProjectController::class, 'bulkDestroy'])->name('bulk-destroy');
             Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');
         });
+        
+        Route::get('/', [ProjectController::class, 'index'])->name('index');
+        Route::get('/{id}', [ProjectController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ProjectController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProjectController::class, 'update'])->name('update');
+
     });
 
     Route::resource('customer', CustomerController::class);

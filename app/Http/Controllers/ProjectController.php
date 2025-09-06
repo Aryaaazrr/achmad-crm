@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailProject;
+use App\Models\Leads;
+use App\Models\Product;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProjectController extends Controller
@@ -28,7 +32,10 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        $leads = Leads::with('project')->where('id_user', Auth::id())->where('status', 'deal')->whereDoesntHave('project')->get();
+        $products = Product::all();
+
+        return Inertia::render('project/create', ['leads' => $leads, 'products' => $products]);
     }
 
     /**
@@ -36,7 +43,67 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_lead' => 'required|exists:leads,id_leads',
+            'products' => 'required|array|min:1',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
+        ]);
+
+        $products = array_filter($request->products, fn($p) => !is_null($p));
+
+        $productIds = array_map(fn($p) => $p['id_product'], $products);
+        $validProductIds = Product::whereIn('id_product', $productIds)->pluck('id_product')->toArray();
+
+        if (count($productIds) !== count($validProductIds)) {
+            return back()->with('error', 'One or more products are invalid.');
+        }
+
+        $totalPrice = 0;
+        $status = 'approved';
+
+        foreach ($products as $productData) {
+            $product = Product::find($productData['id_product']);
+
+            $subtotal = $productData['quantity'] * $productData['price'];
+            $totalPrice += $subtotal;
+
+            if ($productData['price'] < $product->price) {
+                $status = 'waiting';
+            }
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $project = Project::create([
+                'id_lead' => $request->id_lead,
+                'id_user' => Auth::id(),
+                'status' => $status,
+                'total_price' => $totalPrice,
+            ]);
+
+            foreach ($products  as $productData) {
+                DetailProject::create([
+                    'id_project' => $project->id_project,
+                    'id_product' => $productData['id_product'],
+                    'quantity' => $productData['quantity'],
+                    'price' => $productData['price'],
+                    'subtotal' => $productData['quantity'] * $productData['price'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('project.index')
+                ->with('success', "Project created successfully with status: {$status}");
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Failed to create project. Please try again.')
+                        ->withInput();
+        }
     }
 
     /**
@@ -52,7 +119,34 @@ class ProjectController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $project = Project::with('detail_project')->findOrFail($id);
+        $leads = Leads::where('id_user', Auth::id())
+            ->where('status', 'deal')
+            ->get();
+
+        $products = Product::all();
+
+        $detailProducts = ($project->detail_project ?? collect())->mapWithKeys(function($item) {
+            return [
+                $item->id_product => [
+                    'quantity' => (int) $item->quantity,
+                    'price' => (float) $item->price,
+                    'subtotal' => (float) $item->subtotal,
+                ]
+            ];
+        })->toArray();
+
+        return Inertia::render('project/edit', [
+            'project' => [
+                'id_project' => $project->id_project,
+                'id_lead' => $project->id_lead,
+                'total_price' => (float) $project->total_price,
+                'status' => $project->status,
+            ],
+            'leads' => $leads,
+            'products' => $products,
+            'detailProducts' => $detailProducts,
+        ]);
     }
 
     /**
@@ -60,7 +154,39 @@ class ProjectController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $project = Project::findOrFail($id);
+
+        $request->validate([
+            'id_lead' => 'required|exists:leads,id_leads',
+            'products' => 'required|array|min:1',
+            'products.*.id_product' => 'required|exists:product,id_product',
+            'products.*.quantity' => 'required|integer|min:1',
+            'products.*.price' => 'required|numeric|min:0',
+        ]);
+
+        $totalPrice = 0;
+        foreach ($request->products as $productData) {
+            $totalPrice += $productData['quantity'] * $productData['price'];
+        }
+
+        $project->update([
+            'id_lead' => $request->id_lead,
+            'total_price' => $totalPrice,
+        ]);
+
+        $project->detail_project()->delete();
+
+        foreach ($request->products as $productData) {
+            $project->detail_project()->create([
+                'id_product' => $productData['id_product'],
+                'quantity' => $productData['quantity'],
+                'price' => $productData['price'],
+                'subtotal' => $productData['quantity'] * $productData['price'],
+            ]);
+        }
+
+        return redirect()->route('project.index')
+            ->with('success', 'Project updated successfully');
     }
 
     /**

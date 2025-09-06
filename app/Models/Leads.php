@@ -17,6 +17,6 @@ class Leads extends Model
 
     public function project()
     {
-        return $this->belongTo(Project::class, 'id_lead', 'id_leads');
+        return $this->hasOne(Project::class, 'id_lead', 'id_leads');
     }
 }

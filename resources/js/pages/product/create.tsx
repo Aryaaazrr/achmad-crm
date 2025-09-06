@@ -20,7 +20,7 @@ interface Props {
     product: Product;
 }
 
-export default function UsersCreate({ product }: Props) {
+export default function ProductCreate({ product }: Props) {
     const hppInput = useCurrencyInput(product?.hpp || 0);
     const marginInput = usePercentInput(product?.margin || 0);
 

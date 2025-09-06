@@ -42,4 +42,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Leads::class, 'id_user', 'id');
     }
+
+    public function project()
+    {
+        return $this->hasMany(Project::class, 'id_user', 'id');
+    }
 }

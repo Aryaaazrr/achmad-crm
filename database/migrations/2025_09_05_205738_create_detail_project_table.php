@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('id_product')->references('id_product')->on('product')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('quantity')->default(1);
             $table->decimal('price', 15, 2);
+            $table->decimal('subtotal', 15, 2);
             $table->timestamps();
         });
     }
