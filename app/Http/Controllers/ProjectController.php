@@ -111,7 +111,34 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $project = Project::with('detail_project')->findOrFail($id);
+        $leads = Leads::where('id_user', Auth::id())
+            ->where('status', 'deal')
+            ->get();
+
+        $products = Product::all();
+
+        $detailProducts = ($project->detail_project ?? collect())->mapWithKeys(function($item) {
+            return [
+                $item->id_product => [
+                    'quantity' => (int) $item->quantity,
+                    'price' => (float) $item->price,
+                    'subtotal' => (float) $item->subtotal,
+                ]
+            ];
+        })->toArray();
+
+        return Inertia::render('project/show', [
+            'project' => [
+                'id_project' => $project->id_project,
+                'id_lead' => $project->id_lead,
+                'total_price' => (float) $project->total_price,
+                'status' => $project->status,
+            ],
+            'leads' => $leads,
+            'products' => $products,
+            'detailProducts' => $detailProducts,
+        ]);
     }
 
     /**
@@ -162,6 +189,7 @@ class ProjectController extends Controller
             'products.*.id_product' => 'required|exists:product,id_product',
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.price' => 'required|numeric|min:0',
+            'status' => 'required|in:waiting,approved,rejected',
         ]);
 
         $totalPrice = 0;
@@ -172,6 +200,7 @@ class ProjectController extends Controller
         $project->update([
             'id_lead' => $request->id_lead,
             'total_price' => $totalPrice,
+            'status' => $request->status,
         ]);
 
         $project->detail_project()->delete();
@@ -194,11 +223,22 @@ class ProjectController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $project = Project::findOrFail($id);
+        $project->delete();
+
+        return redirect()
+            ->route('project.index')
+            ->with('success', 'Project has been deleted permanent successfully.');
     }
 
-    public function bulkDestroy(string $id)
+    public function bulkDestroy(Request $request)
     {
-        //
+        $ids = $request->input('ids', []);
+
+        if (!empty($ids)) {
+            Project::whereIn('id_project', $ids)->delete();
+        }
+
+        return back()->with('success', count($ids) . ' Project deleted permanent successfully.');
     }
 }

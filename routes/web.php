@@ -59,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/', [ProjectController::class, 'bulkDestroy'])->name('bulk-destroy');
             Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');
         });
-        
+
         Route::get('/', [ProjectController::class, 'index'])->name('index');
         Route::get('/{id}', [ProjectController::class, 'show'])->name('show');
         Route::get('/{id}/edit', [ProjectController::class, 'edit'])->name('edit');

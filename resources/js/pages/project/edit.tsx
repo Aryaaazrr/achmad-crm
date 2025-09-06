@@ -9,7 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import { Form, Link } from '@inertiajs/react';
-import { Calculator, CheckCircle, FileText, LoaderCircle, MapPin, Package, Phone, Plus, Save, ShoppingCart, Target, Trash2, User } from 'lucide-react';
+import {
+    Calculator,
+    CheckCircle,
+    FileText,
+    LoaderCircle,
+    MapPin,
+    Package,
+    Phone,
+    Plus,
+    Save,
+    ShoppingCart,
+    Target,
+    Trash2,
+    User,
+} from 'lucide-react';
 import React from 'react';
 
 interface Lead {
@@ -35,7 +49,7 @@ interface ProductDetail {
 interface Project {
     id_project: number;
     id_lead: number;
-    total_amount: number;
+    total_price: number;
     status: string;
 }
 
@@ -84,8 +98,8 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
             ...prev,
             [product.id_product]: {
                 quantity: 1,
-                price: product.price,
-                subtotal: product.price,
+                price: Math.floor(product.price),
+                subtotal: Math.floor(product.price),
             },
         }));
     };
@@ -202,6 +216,7 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                             )}
                                         </CardContent>
                                     </Card>
+                                    <input type="hidden" name="id_lead" value={selectedLeadData ? selectedLeadData.id_leads : ''} />
 
                                     {/* Products Configuration */}
                                     <Card className="shadow-sm transition-shadow hover:shadow-md">
@@ -380,7 +395,7 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                         <SelectValue placeholder="-- Select project status --" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="pending">
+                                                        <SelectItem value="waiting">
                                                             <div className="flex items-center gap-3 py-1">
                                                                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
                                                                     <CheckCircle className="h-3 w-3 text-yellow-600" />
@@ -422,8 +437,8 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
 
                                 {/* Right Column - Summary Sidebar */}
                                 <div className="lg:col-span-1">
-                                    <Card className="border-2 shadow-lg p-0">
-                                        <CardHeader className="rounded-t-lg bg-gradient-to-r from-primary to-blue-700 text-white p-4">
+                                    <Card className="border-2 p-0 shadow-lg">
+                                        <CardHeader className="rounded-t-lg bg-gradient-to-r from-primary to-blue-700 p-4 text-white">
                                             <CardTitle className="flex items-center gap-2">
                                                 <Calculator className="h-5 w-5" />
                                                 Project Summary
@@ -436,7 +451,9 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Project Info</div>
                                                     <div className="rounded-lg bg-gray-50 p-3">
                                                         <div className="font-medium text-gray-900">Project #{project.id_project}</div>
-                                                        <div className="text-sm text-gray-600">Original Amount: {formatCurrency(project.total_amount)}</div>
+                                                        <div className="text-sm text-gray-600">
+                                                            Original Amount: {formatCurrency(project.total_price)}
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -480,11 +497,17 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                     <div className="rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4 text-center">
                                                         <div className="text-2xl font-bold text-purple-600">{formatCurrency(totalPrice)}</div>
                                                         <div className="mt-1 text-xs text-gray-600">Updated Value</div>
-                                                        {totalPrice !== Number(project.total_amount || 0) && (
+                                                        {totalPrice !== Number(project.total_price || 0) && (
                                                             <div className="mt-2 text-xs">
                                                                 <span className="text-gray-500">Change: </span>
-                                                                <span className={totalPrice > Number(project.total_amount || 0) ? 'text-green-600' : 'text-red-600'}>
-                                                                    {formatCurrency(totalPrice - Number(project.total_amount || 0))}
+                                                                <span
+                                                                    className={
+                                                                        totalPrice > Number(project.total_price || 0)
+                                                                            ? 'text-green-600'
+                                                                            : 'text-red-600'
+                                                                    }
+                                                                >
+                                                                    {formatCurrency(totalPrice - Number(project.total_price || 0))}
                                                                 </span>
                                                             </div>
                                                         )}
@@ -495,7 +518,9 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
 
                                                 {/* Status */}
                                                 <div>
-                                                    <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Current Status</div>
+                                                    <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                                                        Current Status
+                                                    </div>
                                                     <div className={`rounded-lg border p-3 ${currentStatusConfig.color} flex items-center gap-2`}>
                                                         {currentStatusConfig.icon}
                                                         <span className="font-medium">{currentStatusConfig.label}</span>

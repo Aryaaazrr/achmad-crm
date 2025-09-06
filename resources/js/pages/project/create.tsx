@@ -80,8 +80,8 @@ export default function ProjectCreate({ leads, products }: Props) {
             ...prev,
             [product.id_product]: {
                 quantity: 1,
-                price: product.price,
-                subtotal: product.price,
+                price: Math.floor(product.price),
+                subtotal: Math.floor(product.price),
             },
         }));
     };
