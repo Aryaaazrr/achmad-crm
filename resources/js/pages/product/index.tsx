@@ -1,4 +1,3 @@
-
 import { bulkDestroy, create, destroy, edit, showDeleted } from '@/actions/App/Http/Controllers/ProductController';
 import {
     AlertDialog,
@@ -24,7 +23,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, router, usePage } from '@inertiajs/react';
+import product from '@/routes/product';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -37,7 +38,7 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, PencilLine, Trash } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, PencilLine, Plus, Recycle, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 type Product = {
@@ -48,6 +49,13 @@ type Product = {
     price: number;
     created_at: string;
 };
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Product',
+        href: product.index().url,
+    },
+];
 
 export default function Product() {
     const { props } = usePage<{ product: Product[] }>();
@@ -216,7 +224,7 @@ export default function Product() {
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={destroy(product.id_product)} className="flex w-full items-center gap-2">
-                                    <Trash className="h-4 w-4" /> Delete
+                                    <Trash2 className="h-4 w-4" /> Delete
                                 </Link>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -262,14 +270,19 @@ export default function Product() {
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Product"></Head>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
-                <h1 className="text-xl font-black">Product Data</h1>
+                <div>
+                    <h1 className="text-lg font-black sm:text-xl">Product Data</h1>
+                    <small className="hidden sm:flex text-muted-foreground">List of all registered product in the system</small>
+                </div>
                 <div className="flex gap-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button className='bg-red-700 text-white' disabled={table.getSelectedRowModel().rows.length === 0}>
-                                Delete
+                            <Button className="bg-red-700 text-white" disabled={table.getSelectedRowModel().rows.length === 0}>
+                                <Trash2 />
+                                <span className="hidden sm:flex">Delete</span>
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -286,18 +299,24 @@ export default function Product() {
                         </AlertDialogContent>
                     </AlertDialog>
                     <Button asChild className="cursor-pointer bg-amber-500 hover:bg-amber-600 dark:text-white">
-                        <Link href={showDeleted()}>Recovery</Link>
+                        <Link href={showDeleted()}>
+                            <Recycle />
+                            <span className="hidden sm:flex">Recovery</span>
+                        </Link>
                     </Button>
                     <Button asChild className="cursor-pointer dark:text-white">
-                        <Link href={create()}>Create</Link>
+                        <Link href={create()}>
+                            <Plus />
+                            <span className="hidden sm:flex">Create</span>
+                        </Link>
                     </Button>
                 </div>
             </div>
 
             <div className="mx-6 h-full rounded-xl">
-                <div className="flex items-center py-4">
+                <div className="flex items-center gap-2 py-4">
                     <Input
-                        placeholder="Search users..."
+                        placeholder="Search product..."
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(String(e.target.value))}
                         className="max-w-sm"
