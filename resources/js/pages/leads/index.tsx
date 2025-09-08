@@ -24,7 +24,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, router, usePage } from '@inertiajs/react';
+import leads from '@/routes/leads';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -37,7 +39,7 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, Ban, CheckCircle2Icon, ChevronDown, Handshake, LoaderIcon, PencilLine, PhoneCall, Trash } from 'lucide-react';
+import { ArrowUpDown, Ban, CheckCircle2Icon, ChevronDown, Handshake, LoaderIcon, PencilLine, PhoneCall, Plus, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 type User = {
@@ -61,6 +63,13 @@ type Leads = {
 type Auth = {
     permissions: string[];
 };
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Leads',
+        href: leads.index().url,
+    },
+];
 
 export default function Leads({ auth }: { auth: Auth }) {
     const { props } = usePage<{ leads: Leads[] }>();
@@ -171,7 +180,17 @@ export default function Leads({ auth }: { auth: Auth }) {
             cell: ({ row }) => (
                 <div className="flex justify-center">
                     <Badge variant="outline" className="flex gap-1 px-1.5 text-muted-foreground [&_svg]:size-3">
-                        {row.original.status === 'deal' ? <CheckCircle2Icon className="text-green-500 dark:text-green-400" /> : row.original.status === 'contacted' ? <PhoneCall className="text-emerald-500 dark:text-emerald-400" /> : row.original.status === 'negotiation' ? <Handshake className="text-amber-500 dark:text-amber-400" /> : row.original.status === 'cancel' ? <Ban className="text-red-500 dark:text-red-400" /> : <LoaderIcon />}
+                        {row.original.status === 'deal' ? (
+                            <CheckCircle2Icon className="text-green-500 dark:text-green-400" />
+                        ) : row.original.status === 'contacted' ? (
+                            <PhoneCall className="text-emerald-500 dark:text-emerald-400" />
+                        ) : row.original.status === 'negotiation' ? (
+                            <Handshake className="text-amber-500 dark:text-amber-400" />
+                        ) : row.original.status === 'cancel' ? (
+                            <Ban className="text-red-500 dark:text-red-400" />
+                        ) : (
+                            <LoaderIcon />
+                        )}
                         {row.original.status}
                     </Badge>
                 </div>
@@ -256,7 +275,7 @@ export default function Leads({ auth }: { auth: Auth }) {
                             {canCreate && (
                                 <DropdownMenuItem asChild>
                                     <Link href={destroy(leads.id_leads)} className="flex w-full items-center gap-2">
-                                        <Trash className="h-4 w-4" /> Delete
+                                        <Trash2 className="h-4 w-4" /> Delete
                                     </Link>
                                 </DropdownMenuItem>
                             )}
@@ -303,15 +322,20 @@ export default function Leads({ auth }: { auth: Auth }) {
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Leads"></Head>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
-                <h1 className="text-xl font-black">Leads Data</h1>
+                <div>
+                    <h1 className="text-lg font-black sm:text-xl">Leads Data</h1>
+                    <small className="hidden text-muted-foreground sm:flex">List of all registered leads in the system</small>
+                </div>
                 <div className="flex gap-2">
                     {canCreate && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" disabled={table.getSelectedRowModel().rows.length === 0}>
-                                    Delete
+                                <Button className="bg-red-700 text-white hover:bg-red-800" disabled={table.getSelectedRowModel().rows.length === 0}>
+                                    <Trash2 />
+                                    <span className="hidden sm:flex">Delete</span>
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -332,7 +356,10 @@ export default function Leads({ auth }: { auth: Auth }) {
                     )}
                     {canCreate && (
                         <Button asChild className="cursor-pointer dark:text-white">
-                            <Link href={create()}>Create</Link>
+                            <Link href={create()}>
+                                <Plus />
+                                <span className="hidden sm:flex">Create</span>
+                            </Link>
                         </Button>
                     )}
                 </div>
@@ -341,7 +368,7 @@ export default function Leads({ auth }: { auth: Auth }) {
             <div className="mx-6 h-full rounded-xl">
                 <div className="flex items-center py-4">
                     <Input
-                        placeholder="Search data..."
+                        placeholder="Search leads..."
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(String(e.target.value))}
                         className="max-w-sm"

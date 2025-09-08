@@ -1,4 +1,4 @@
-import LeadsController, { index } from '@/actions/App/Http/Controllers/LeadsController';
+import LeadsController from '@/actions/App/Http/Controllers/LeadsController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import usePhoneInput from '@/hooks/use-phone';
 import AppLayout from '@/layouts/app-layout';
-import { Form, Link } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import leads, { index } from '@/routes/leads';
+import { BreadcrumbItem } from '@/types';
+import { Form, Head, Link } from '@inertiajs/react';
+import { ArrowLeft, LoaderCircle, SquarePen } from 'lucide-react';
 import React from 'react';
 
 interface Leads {
@@ -24,24 +26,36 @@ interface Props {
     leads: Leads;
 }
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Leads',
+        href: leads.index().url,
+    },
+    {
+        title: 'Edit',
+        href: leads.index().toString(),
+    },
+];
+
 export default function LeadsCreate({ leads }: Props) {
     const contactInput = usePhoneInput(leads?.contact || '');
     const [status, setStatus] = React.useState(leads.status || 'new');
 
     return (
-        <AppLayout>
-            <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 p-4">
-                <h1 className="text-xl font-black">Edit Leads - {leads.name}</h1>
-                <Button asChild variant={'destructive'} className="cursor-pointer dark:text-white">
-                    <Link href={index()}>Back</Link>
-                </Button>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Edit Leads" />
+            <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
+                <div>
+                    <h1 className="text-lg font-black sm:text-xl">{leads.name}</h1>
+                    <small className="hidden text-muted-foreground sm:flex">Update the details of this users to keep the information accurate</small>
+                </div>
             </div>
-            <div className="mx-6 h-full rounded-xl bg-muted/50 p-4">
+            <div className="mx-6 h-full rounded-xl">
                 <div className="flex items-center py-4">
-                    <Form {...LeadsController.update.form(leads.id_leads)} className="grid w-full grid-cols-2 gap-4">
+                    <Form {...LeadsController.update.form(leads.id_leads)} className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
                         {({ processing, errors }) => (
                             <>
-                                <div className="flex flex-wrap space-y-2">
+                                <div className="flex flex-col space-y-2">
                                     <Label>Name</Label>
                                     <Input
                                         id="name"
@@ -55,7 +69,7 @@ export default function LeadsCreate({ leads }: Props) {
                                     />
                                     <InputError message={errors.name} />
                                 </div>
-                                <div className="flex flex-wrap space-y-2">
+                                <div className="flex flex-col space-y-2">
                                     <Label>Contact</Label>
                                     <Input
                                         id="contact"
@@ -69,7 +83,7 @@ export default function LeadsCreate({ leads }: Props) {
                                     <input type="hidden" name="contact" value={contactInput.rawValue} />
                                     <InputError message={errors.contact} />
                                 </div>
-                                <div className="flex flex-wrap space-y-2">
+                                <div className="flex flex-col space-y-2">
                                     <Label>Address</Label>
                                     <Input
                                         id="address"
@@ -83,7 +97,7 @@ export default function LeadsCreate({ leads }: Props) {
                                     <input type="hidden" />
                                     <InputError message={errors.address} />
                                 </div>
-                                <div className="flex flex-wrap space-y-2">
+                                <div className="flex flex-col space-y-2">
                                     <Label>Needs</Label>
                                     <Input
                                         id="needs"
@@ -97,9 +111,9 @@ export default function LeadsCreate({ leads }: Props) {
                                     <input type="hidden" />
                                     <InputError message={errors.needs} />
                                 </div>
-                                <div className="col-span-2 flex flex-col space-y-2">
+                                <div className="col-span-1 flex flex-col space-y-2 md:col-span-2">
                                     <Label htmlFor="status">Status</Label>
-                                    <Select value={status} onValueChange={value => setStatus(value as Leads['status'])}>
+                                    <Select value={status} onValueChange={(value) => setStatus(value as Leads['status'])}>
                                         <SelectTrigger tabIndex={5} className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -117,10 +131,19 @@ export default function LeadsCreate({ leads }: Props) {
                                     <InputError message={errors.status} />
                                 </div>
 
-                                <div className="col-span-2 flex justify-center md:justify-end">
-                                    <Button type="submit" tabIndex={5} className="w-full cursor-pointer md:w-1/2" disabled={processing}>
+                                <div className="col-span-1 flex justify-end gap-2 md:col-span-2">
+                                    <Button asChild variant={'secondary'} className="cursor-pointer ">
+                                        <Link href={index()}> <ArrowLeft /> Back</Link>
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        tabIndex={5}
+                                        className="cursor-pointer text-white bg-amber-500 hover:bg-amber-600"
+                                        disabled={processing}
+                                    >
                                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                        Submit
+                                        <SquarePen />
+                                        Update
                                     </Button>
                                 </div>
                             </>
