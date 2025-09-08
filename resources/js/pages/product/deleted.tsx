@@ -262,8 +262,7 @@ export default function Product() {
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button
-                                variant="destructive"
-                                className="cursor-pointer text-white"
+                                className="cursor-pointer bg-red-700 hover:bg-red-800 text-white"
                                 disabled={table.getSelectedRowModel().rows.length === 0}
                             >
                                 <ArchiveX />

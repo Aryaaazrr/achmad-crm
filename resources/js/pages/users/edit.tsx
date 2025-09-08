@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/app-layout';
 import users from '@/routes/users';
 import { type BreadcrumbItem } from '@/types';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, SquarePen } from 'lucide-react';
 
 interface User {
     id: number;
@@ -40,10 +40,10 @@ export default function UsersEdit({ user }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Users" />
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
-                <h1 className="text-xl font-black">Edit User - {user.name}</h1>
-                <Button asChild variant={'destructive'} className="cursor-pointer text-white">
-                    <Link href={index()}>Back</Link>
-                </Button>
+                <div>
+                    <h1 className="text-lg font-black sm:text-xl">{user.name}</h1>
+                    <small className="hidden text-muted-foreground sm:flex">Update the details of this users to keep the information accurate</small>
+                </div>
             </div>
             <div className="mx-6 h-full rounded-xl">
                 <div className="flex items-center py-4">
@@ -81,14 +81,19 @@ export default function UsersEdit({ user }: Props) {
                                 </div>
 
                                 {/* Submit */}
-                                <div className="col-span-2 flex justify-center md:justify-end">
+                                <div className="col-span-1 flex justify-end gap-2 md:col-span-2">
+                                    <Button asChild variant={'secondary'} className="cursor-pointer ">
+                                        <Link href={index()}> <ArrowLeft /> Back</Link>
+                                    </Button>
                                     <Button
                                         type="submit"
-                                        className="w-full cursor-pointer bg-amber-500 hover:bg-amber-600 md:w-1/2"
+                                        tabIndex={5}
+                                        className="cursor-pointer text-white bg-amber-500 hover:bg-amber-600"
                                         disabled={processing}
                                     >
-                                        {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                                        {processing ? 'Updating...' : 'Update User'}
+                                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                        <SquarePen />
+                                        Update
                                     </Button>
                                 </div>
                             </>

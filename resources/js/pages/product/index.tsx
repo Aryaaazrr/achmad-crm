@@ -280,7 +280,7 @@ export default function Product() {
                 <div className="flex gap-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button className="bg-red-700 text-white" disabled={table.getSelectedRowModel().rows.length === 0}>
+                            <Button className="bg-red-700 hover:bg-red-800 text-white" disabled={table.getSelectedRowModel().rows.length === 0}>
                                 <Trash2 />
                                 <span className="hidden sm:flex">Delete</span>
                             </Button>

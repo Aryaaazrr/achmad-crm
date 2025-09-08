@@ -9,7 +9,7 @@ import AppLayout from '@/layouts/app-layout';
 import product from '@/routes/product';
 import {type BreadcrumbItem } from '@/types';
 import { Form, Head, Link } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
+import { ArrowLeft, LoaderCircle, Send } from 'lucide-react';
 
 interface Product {
     id_product: number;
@@ -97,11 +97,12 @@ export default function ProductCreate({ product }: Props) {
                                     <p className="text-xs text-muted-foreground">Based on HPP + Margin</p>
                                 </div>
                                 <div className="col-span-1 flex justify-end md:col-span-2 gap-2">
-                                    <Button asChild variant={'destructive'} className="cursor-pointer text-white">
-                                        <Link href={index()}>Back</Link>
+                                    <Button asChild variant={'secondary'} className="cursor-pointer">
+                                        <Link href={index()}> <ArrowLeft />Back</Link>
                                     </Button>
                                     <Button type="submit" tabIndex={5} className="cursor-pointer text-white" disabled={processing}>
                                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                        <Send />
                                         Submit
                                     </Button>
                                 </div>

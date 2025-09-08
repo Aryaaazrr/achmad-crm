@@ -23,7 +23,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, router, usePage } from '@inertiajs/react';
+import users from '@/routes/users';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -36,7 +38,7 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArchiveRestore, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { ArchiveRestore, ArchiveX, ArrowLeft, ArrowUpDown, ChevronDown } from 'lucide-react';
 import * as React from 'react';
 
 export type User = {
@@ -174,6 +176,17 @@ export const columns: ColumnDef<User>[] = [
     },
 ];
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Users',
+        href: users.index().url,
+    },
+    {
+        title: 'Trash',
+        href: users.index().toString(),
+    },
+];
+
 export default function Users() {
     const { props } = usePage<{ users: User[] }>();
     const [localUsers, setLocalUsers] = React.useState<User[]>(props.users);
@@ -221,14 +234,25 @@ export default function Users() {
     };
 
     return (
-        <AppLayout>
-            <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 px-4">
-                <h1 className="text-xl font-black">Deleted Users Data</h1>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title='Trash Users'></Head>
+            <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
+                <div>
+                    <h1 className="text-lg font-black sm:text-xl">Trash Users</h1>
+                    <small className="hidden sm:flex text-muted-foreground">View and manage users that have been moved to trash</small>
+                </div>
                 <div className="flex gap-2">
+                     <Button asChild variant={'secondary'} className="cursor-pointer dark:text-white">
+                        <Link href={index()}>
+                            <ArrowLeft />
+                            <span className='hidden sm:flex'>Back</span>
+                        </Link>
+                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className='text-white cursor-pointer' disabled={table.getSelectedRowModel().rows.length === 0}>
-                                Delete Permanent
+                            <Button className='bg-red-700 hover:bg-red-800 text-white cursor-pointer' disabled={table.getSelectedRowModel().rows.length === 0}>
+                                <ArchiveX />
+                                <span className="hidden sm:flex">Delete Permanent</span>
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -246,12 +270,9 @@ export default function Users() {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <Button asChild className="cursor-pointer dark:text-white">
-                        <Link href={index()}>Back</Link>
-                    </Button>
                 </div>
             </div>
-            <div className="mx-6 h-full rounded-xl bg-muted/50 p-4">
+            <div className="mx-6 h-full rounded-xl">
                 <div className="flex items-center py-4">
                     <Input placeholder="Search users..." onChange={(e) => table.setGlobalFilter(String(e.target.value))} className="max-w-sm" />
                     <DropdownMenu>

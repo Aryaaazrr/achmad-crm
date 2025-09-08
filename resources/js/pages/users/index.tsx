@@ -38,7 +38,7 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, PencilLine, Trash } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, PencilLine, Plus, Recycle, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 type User = {
@@ -167,7 +167,7 @@ export default function Users() {
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link href={destroy(user.id)} className="flex w-full items-center gap-2">
-                                    <Trash className="h-4 w-4" /> Delete
+                                    <Trash2 className="h-4 w-4" /> Delete
                                 </Link>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -218,17 +218,14 @@ export default function Users() {
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
                 <div>
                     <h1 className="text-xl font-black">Users Data</h1>
-                    <small className="hidden md:flex">List of all registered users in the system</small>
+                    <small className="hidden text-muted-foreground md:flex">List of all registered users in the system</small>
                 </div>
                 <div className="flex gap-2">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button
-                                variant={'destructive'}
-                                disabled={table.getSelectedRowModel().rows.length === 0}
-                                className=" text-white"
-                            >
-                                Delete
+                            <Button disabled={table.getSelectedRowModel().rows.length === 0} className="bg-red-700 hover:bg-red-800 text-white">
+                                <Trash2 />
+                                <span className="hidden sm:flex">Delete</span>
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -245,16 +242,23 @@ export default function Users() {
                         </AlertDialogContent>
                     </AlertDialog>
                     <Button asChild className="cursor-pointer bg-amber-500 hover:bg-amber-600 dark:text-white">
-                        <Link href={showDeleted()}>Recovery</Link>
+                        <Link href={showDeleted()}>
+                            {' '}
+                            <Recycle />
+                            <span className="hidden sm:flex">Recovery</span>
+                        </Link>
                     </Button>
                     <Button asChild className="cursor-pointer dark:text-white">
-                        <Link href={create()}>Create</Link>
+                        <Link href={create()}>
+                            <Plus />
+                            <span className="hidden sm:flex">Create</span>
+                        </Link>
                     </Button>
                 </div>
             </div>
 
             <div className="mx-6 h-full rounded-xl">
-                <div className="flex items-center py-4">
+                <div className="flex items-center py-4 gap-2">
                     <Input
                         placeholder="Search users..."
                         value={globalFilter ?? ''}
