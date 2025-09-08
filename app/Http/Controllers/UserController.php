@@ -76,7 +76,7 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('roles:name')->findOrFail($id);
         $roles = Role::all();
 
         return Inertia::render('users/edit', [
@@ -93,18 +93,10 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'role'          => ['required', 'string', 'exists:roles,name'],
         ]);
 
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-
-        if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
-        }
-
-        $user->save();
+        $user->syncRoles($validated['role']);
 
         return redirect()->route('users.index')
                         ->with('success', 'User has been updated successfully');

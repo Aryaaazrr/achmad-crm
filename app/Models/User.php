@@ -37,4 +37,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function leads()
+    {
+        return $this->hasMany(Leads::class, 'id_user', 'id');
+    }
+
+    public function project()
+    {
+        return $this->hasMany(Project::class, 'id_user', 'id');
+    }
 }

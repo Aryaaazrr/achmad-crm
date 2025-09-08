@@ -17,7 +17,7 @@ export default function UsersCreate() {
             {/* Header */}
             <div className="mx-6 mb-6 flex h-20 items-center justify-between rounded-xl">
                 <h1 className="text-xl font-black">Create Users</h1>
-                <Button asChild variant="destructive" className="cursor-pointer bg-red-900 text-white hover:bg-red-800">
+                <Button asChild variant="destructive" className="cursor-pointer text-white">
                     <Link href={index()}>Back</Link>
                 </Button>
             </div>

@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +37,38 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('product', ProductController::class);
     });
+
+    Route::prefix('leads')->name('leads.')->group(function () {
+        Route::middleware('role:' . User::ROLE_SALES)->group(function () {
+            Route::get('/create', [LeadsController::class, 'create'])->name('create');
+            Route::post('/', [LeadsController::class, 'store'])->name('store');
+            Route::delete('/', [LeadsController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::delete('/{id}', [LeadsController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::get('/', [LeadsController::class, 'index'])->name('index');
+        Route::get('/{id}/edit', [LeadsController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [LeadsController::class, 'update'])->name('update');
+    });
+
+    Route::prefix('project')->name('project.')->group(function () {
+        Route::middleware('role:' . User::ROLE_SALES)->group(function () {
+            Route::get('/create', [ProjectController::class, 'create'])->name('create');
+            Route::post('/', [ProjectController::class, 'store'])->name('store');
+            Route::delete('/', [ProjectController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::delete('/{id}', [ProjectController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::get('/', [ProjectController::class, 'index'])->name('index');
+        Route::get('/{id}', [ProjectController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [ProjectController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ProjectController::class, 'update'])->name('update');
+    });
+
+    Route::resource('customer', CustomerController::class)->only(['index', 'show']);
+
+    Route::get('report', [ReportController::class, 'index'])->name('report.index');
+    Route::get('report/export', [ReportController::class, 'export'])->name('report.export');
 });
 
 require __DIR__.'/settings.php';

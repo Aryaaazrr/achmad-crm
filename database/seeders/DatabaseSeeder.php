@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleAndPermissionSeeder::class,
+            ProductSeeder::class
         ]);
 
         $fakeSales = User::factory(10)->create();
@@ -35,5 +36,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $sales->assignRole(User::ROLE_SALES);
+
+        $this->call([
+            LeadsSeeder::class,
+            ProjectSeeder::class,
+        ]);
     }
 }
