@@ -25,31 +25,31 @@ class Project extends Model
         return $this->hasMany(DetailProject::class, 'id_project', 'id_project');
     }
 
-    // protected static function booted()
-    // {
-    //     static::created(function ($project) {
-    //         if ($project->isDirty('status') && $project->status === 'approved') {
-    //             $exists = Customer::where('id_leads', $project->id_lead)->exists();
+    protected static function booted()
+    {
+        static::created(function ($project) {
+            if ($project->isDirty('status') && $project->status === 'approved') {
+                $exists = Customer::where('id_leads', $project->id_lead)->exists();
 
-    //             if (!$exists) {
-    //                 Customer::create([
-    //                     'id_leads' => $project->id_lead,
-    //                     'status' => 'active',
-    //                 ]);
-    //             }
-    //         }
-    //     });
-    //     static::updated(function ($project) {
-    //         if ($project->isDirty('status') && $project->status === 'approved') {
-    //             $exists = Customer::where('id_leads', $project->id_lead)->exists();
+                if (!$exists) {
+                    Customer::create([
+                        'id_leads' => $project->id_lead,
+                        'status' => 'active',
+                    ]);
+                }
+            }
+        });
+        static::updated(function ($project) {
+            if ($project->isDirty('status') && $project->status === 'approved') {
+                $exists = Customer::where('id_leads', $project->id_lead)->exists();
 
-    //             if (!$exists) {
-    //                 Customer::create([
-    //                     'id_leads' => $project->id_lead,
-    //                     'status' => 'active',
-    //                 ]);
-    //             }
-    //         }
-    //     });
-    // }
+                if (!$exists) {
+                    Customer::create([
+                        'id_leads' => $project->id_lead,
+                        'status' => 'active',
+                    ]);
+                }
+            }
+        });
+    }
 }

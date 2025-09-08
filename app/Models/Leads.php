@@ -20,8 +20,8 @@ class Leads extends Model
         return $this->hasOne(Project::class, 'id_lead', 'id_leads');
     }
 
-    // public function customer()
-    // {
-    //     return $this->hasOne(Customer::class, 'id_leads', 'id_leads');
-    // }
+    public function customer()
+    {
+        return $this->hasOne(Customer::class, 'id_leads', 'id_leads');
+    }
 }

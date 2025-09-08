@@ -1,16 +1,5 @@
-
-import { bulkDestroy, create, destroy, edit, showDeleted } from '@/actions/App/Http/Controllers/ProductController';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { show } from '@/actions/App/Http/Controllers/CustomerController';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -24,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -37,25 +26,30 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, PencilLine, Trash } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, Info, UserCheck, UserX } from 'lucide-react';
 import * as React from 'react';
 
-type Product = {
-    id_product: number;
+type Lead = {
+    id_leads: number;
     name: string;
-    hpp: number;
-    margin: number;
-    price: number;
-    created_at: string;
 };
 
-export default function Product() {
-    const { props } = usePage<{ product: Product[] }>();
-    const [localProduct, setlocalProduct] = React.useState<Product[]>(props.product);
+type Customer = {
+    id_customer: number;
+    id_leads: number;
+    status: 'active' | 'non-active';
+    created_at: string;
+    updated_at: string;
+    lead?: Lead;
+};
+
+export default function Customer() {
+    const { props } = usePage<{ customer: Customer[] }>();
+    const [localCustomers, setLocalCustomers] = React.useState<Customer[]>(props.customer);
 
     React.useEffect(() => {
-        setlocalProduct(props.product);
-    }, [props.product]);
+        setLocalCustomers(props.customer);
+    }, [props.customer]);
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -63,7 +57,7 @@ export default function Product() {
     const [rowSelection, setRowSelection] = React.useState({});
     const [globalFilter, setGlobalFilter] = React.useState('');
 
-    const columns: ColumnDef<Product>[] = [
+    const columns: ColumnDef<Customer>[] = [
         {
             id: 'select',
             header: ({ table }) => (
@@ -80,76 +74,70 @@ export default function Product() {
             enableHiding: false,
         },
         {
-            accessorKey: 'name',
+            id: 'customer_name',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Name <ArrowUpDown />
+                    Customer Name <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="text-center capitalize">{row.getValue('name')}</div>,
-        },
-        {
-            accessorKey: 'hpp',
-            header: ({ column }) => (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="mx-auto flex items-center gap-2"
-                >
-                    Hpp <ArrowUpDown />
-                </Button>
+            cell: ({ row }) => (
+                <div className="text-center capitalize">
+                    {row.original.lead?.name ?? 'Unknown Customer'}
+                </div>
             ),
-            cell: ({ row }) => {
-                const value = row.getValue('hpp') as number;
-                const formatted = new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                }).format(value);
-                return <div className="text-center">{formatted}</div>;
+            sortingFn: (rowA, rowB) => {
+                const nameA = rowA.original.lead?.name ?? '';
+                const nameB = rowB.original.lead?.name ?? '';
+                return nameA.localeCompare(nameB);
             },
         },
         {
-            accessorKey: 'margin',
+            accessorKey: 'id_leads',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Margin <ArrowUpDown />
+                    Lead ID <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => {
-                const value = parseFloat(row.getValue('margin'));
-                const formatted = `${value}%`;
-                return <div className="text-center">{formatted}</div>;
-            },
+            cell: ({ row }) => <div className="text-center">#{row.getValue('id_leads')}</div>,
         },
         {
-            accessorKey: 'price',
+            accessorKey: 'status',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Price <ArrowUpDown />
+                    Status <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => {
-                const value = row.getValue('price') as number;
-                const formatted = new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0,
-                }).format(value);
-                return <div className="text-center">{formatted}</div>;
-            },
+            cell: ({ row }) => (
+                <div className="flex justify-center">
+                    <Badge
+                        variant="outline"
+                        className={`flex gap-1 px-2 py-1 text-xs font-medium [&_svg]:size-3 ${
+                            row.original.status === 'active'
+                                ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-700 dark:bg-green-900/20 dark:text-green-400'
+                                : 'border-red-200 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900/20 dark:text-red-400'
+                        }`}
+                    >
+                        {row.original.status === 'active' ? (
+                            <UserCheck className="text-green-600 dark:text-green-400" />
+                        ) : (
+                            <UserX className="text-red-600 dark:text-red-400" />
+                        )}
+                        {row.original.status === 'active' ? 'Active' : 'Non-Active'}
+                    </Badge>
+                </div>
+            ),
         },
         {
             accessorKey: 'created_at',
@@ -201,22 +189,20 @@ export default function Product() {
             id: 'actions',
             enableHiding: false,
             cell: ({ row }) => {
-                const product = row.original;
+                const customer = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <button className="p-2">⋮</button>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <span className="text-lg">⋮</span>
+                            </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem asChild>
-                                <Link href={edit(product.id_product)} className="flex w-full items-center gap-2">
-                                    <PencilLine className="h-4 w-4" /> Edit
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href={destroy(product.id_product)} className="flex w-full items-center gap-2">
-                                    <Trash className="h-4 w-4" /> Delete
+                                <Link href={show(customer.id_customer)} className="flex w-full items-center gap-2 cursor-pointer">
+                                    <Info className="h-4 w-4" /> Detail
                                 </Link>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -227,7 +213,7 @@ export default function Product() {
     ];
 
     const table = useReactTable({
-        data: localProduct,
+        data: localCustomers,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -247,57 +233,31 @@ export default function Product() {
         },
     });
 
-    const handleDeleteSelected = () => {
-        const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id_product);
-        if (selectedIds.length === 0) return;
-
-        router.delete(bulkDestroy(), {
-            data: { ids: selectedIds },
-            preserveScroll: true,
-            onSuccess: () => {
-                setlocalProduct((prev) => prev.filter((product) => !selectedIds.includes(product.id_product)));
-                setRowSelection({});
-            },
-        });
-    };
+    const activeCustomers = localCustomers.filter(c => c.status === 'active').length;
+    const totalCustomers = localCustomers.length;
 
     return (
         <AppLayout>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
-                <h1 className="text-xl font-black">Product Data</h1>
+                <div>
+                    <h1 className="text-xl font-black">Customer Data</h1>
+                </div>
                 <div className="flex gap-2">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button className='bg-red-700 text-white' disabled={table.getSelectedRowModel().rows.length === 0}>
-                                Delete
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} products?</AlertDialogTitle>
-                                <AlertDialogDescription>The products will be deleted and can still be restored.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">
-                                    Hapus
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    <Button asChild className="cursor-pointer bg-amber-500 hover:bg-amber-600 dark:text-white">
-                        <Link href={showDeleted()}>Recovery</Link>
-                    </Button>
-                    <Button asChild className="cursor-pointer dark:text-white">
-                        <Link href={create()}>Create</Link>
-                    </Button>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <UserCheck className="h-3 w-3 mr-1" />
+                        {activeCustomers} Active
+                    </Badge>
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                        <UserX className="h-3 w-3 mr-1" />
+                        {totalCustomers - activeCustomers} Inactive
+                    </Badge>
                 </div>
             </div>
 
             <div className="mx-6 h-full rounded-xl">
                 <div className="flex items-center py-4">
                     <Input
-                        placeholder="Search users..."
+                        placeholder="Search customers..."
                         value={globalFilter ?? ''}
                         onChange={(e) => setGlobalFilter(String(e.target.value))}
                         className="max-w-sm"
@@ -319,7 +279,7 @@ export default function Product() {
                                         checked={column.getIsVisible()}
                                         onCheckedChange={(value) => column.toggleVisibility(!!value)}
                                     >
-                                        {column.id}
+                                        {column.id.replace('_', ' ')}
                                     </DropdownMenuCheckboxItem>
                                 ))}
                         </DropdownMenuContent>
@@ -351,7 +311,7 @@ export default function Product() {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={columns.length} className="h-24 text-center">
-                                        No results.
+                                        No customers found.
                                     </TableCell>
                                 </TableRow>
                             )}
