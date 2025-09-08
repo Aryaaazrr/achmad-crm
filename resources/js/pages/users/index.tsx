@@ -233,8 +233,8 @@ export default function Users() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} user(s)?</AlertDialogTitle>
-                                <AlertDialogDescription>The user(s) will be deleted and can still be restored within 30 days.</AlertDialogDescription>
+                                <AlertDialogTitle>Are you delete {table.getSelectedRowModel().rows.length} users?</AlertDialogTitle>
+                                <AlertDialogDescription>The users will be deleted and can still be restored.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Batal</AlertDialogCancel>
