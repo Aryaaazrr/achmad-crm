@@ -23,7 +23,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, router, usePage } from '@inertiajs/react';
+import users from '@/routes/users';
+import { type BreadcrumbItem } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -46,6 +48,13 @@ type User = {
     role: string;
     created_at: string;
 };
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Users',
+        href: users.index().toString(),
+    },
+];
 
 export default function Users() {
     const { props } = usePage<{ users: User[] }>();
@@ -204,11 +213,12 @@ export default function Users() {
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Users" />
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
                 <div>
                     <h1 className="text-xl font-black">Users Data</h1>
-                    <small className='hidden md:flex'>List of all registered users in the system</small>
+                    <small className="hidden md:flex">List of all registered users in the system</small>
                 </div>
                 <div className="flex gap-2">
                     <AlertDialog>
@@ -216,7 +226,7 @@ export default function Users() {
                             <Button
                                 variant={'destructive'}
                                 disabled={table.getSelectedRowModel().rows.length === 0}
-                                className="bg-red-900 text-white dark:text-red-400"
+                                className=" text-white"
                             >
                                 Delete
                             </Button>
