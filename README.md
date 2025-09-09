@@ -11,7 +11,7 @@ Aplikasi ini ditujukan untuk tim **Sales** dan **Manager** agar pengelolaan data
 
 - 🔑 **Login & Autentikasi**  
   - Hanya user yang login dapat mengakses dashboard.  
-  - Autentikasi menggunakan **session** atau **JWT**.  
+  - Autentikasi menggunakan **session** .  
 
 - 📂 **Halaman Leads (Calon Customer)**  
   - Tambah, edit, hapus, dan menampilkan daftar leads.  
@@ -88,6 +88,10 @@ composer run dev
 7. **Akses aplikasi**: Buka `http://localhost:8000` di browser.
 
 ---
+
+## 🔗 Link Demo 
+
+ `https://achmad-crm-master-mucftg.laravel.cloud/login`
 
 ## 🚀 Cara Penggunaan
 
