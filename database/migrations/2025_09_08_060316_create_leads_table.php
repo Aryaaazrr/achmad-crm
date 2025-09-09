@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('leads', function (Blueprint $table) {
             $table->id('id_leads');
             $table->string('name');
-            $table->string('contact')->nullable();
+            $table->string('contact')->unique()->nullable();
             $table->string('address')->nullable();
             $table->text('needs')->nullable();
             $table->enum('status', ['new', 'contacted', 'negotiation', 'deal', 'cancel'])->default('new');

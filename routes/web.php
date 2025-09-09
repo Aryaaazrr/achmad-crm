@@ -68,7 +68,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('customer', CustomerController::class)->only(['index', 'show']);
 
     Route::get('report', [ReportController::class, 'index'])->name('report.index');
-    Route::get('report/export', [ReportController::class, 'export'])->name('report.export');
 });
 
 require __DIR__.'/settings.php';

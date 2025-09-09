@@ -8,8 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
-import { Form, Link } from '@inertiajs/react';
+import project from '@/routes/project';
+import { BreadcrumbItem } from '@/types';
+import { Form, Head, Link } from '@inertiajs/react';
 import {
+    ArrowLeft,
     Calculator,
     CheckCircle,
     FileText,
@@ -59,6 +62,17 @@ interface Props {
     products: Product[];
     detailProducts: { [key: number]: ProductDetail };
 }
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Project',
+        href: project.index().url,
+    },
+    {
+        title: 'Edit',
+        href: project.index().toString(),
+    },
+];
 
 export default function ProjectEdit({ project, leads, products, detailProducts }: Props) {
     const [selectedLead] = React.useState(project.id_lead.toString());
@@ -119,96 +133,91 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
         }).format(amount);
     };
 
-    const getStatusConfig = (statusValue: string) => {
-        switch (statusValue) {
-            case 'approved':
-                return {
-                    icon: <CheckCircle className="h-4 w-4" />,
-                    color: 'bg-green-100 text-green-800 border-green-200',
-                    label: 'Approved',
-                };
-            case 'rejected':
-                return {
-                    icon: <CheckCircle className="h-4 w-4" />,
-                    color: 'bg-red-100 text-red-800 border-red-200',
-                    label: 'Rejected',
-                };
-            default:
-                return {
-                    icon: <CheckCircle className="h-4 w-4" />,
-                    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                    label: 'Waiting Approval',
-                };
-        }
-    };
-
-    const currentStatusConfig = getStatusConfig(project.status);
-
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Edit Project"></Head>
             {/* Header */}
-            <div className="mx-6 flex h-20 items-center justify-between rounded-xl bg-muted/50 p-4">
+            <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
                 <div>
                     <h1 className="text-xl font-black">Edit Project</h1>
                     <p className="text-sm text-muted-foreground">Project ID: #{project.id_project}</p>
                 </div>
-                <Button asChild variant={'destructive'} className="cursor-pointer dark:text-white">
-                    <Link href={index()}>Back</Link>
+                <Button asChild variant={'secondary'} className="cursor-pointer dark:text-white">
+                    <Link href={index()}>
+                        <ArrowLeft />
+                        <span className="hidden sm:flex">Back</span>
+                    </Link>
                 </Button>
             </div>
 
-            <div className="mx-6 space-y-6 pb-8">
-                <Form {...ProjectController.update.form(project.id_project)}>
-                    {({ processing }) => (
-                        <>
-                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="mx-6 h-full rounded-xl">
+                <div className="flex items-center py-4">
+                    <Form {...ProjectController.update.form(project.id_project)} className="grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
+                        {({ processing }) => (
+                            <>
                                 {/* Left Column - Main Configuration */}
-                                <div className="space-y-6 lg:col-span-2">
+                                <div className="col-span-1 space-y-4 lg:col-span-2">
                                     {/* Lead Selection */}
                                     <Card className="shadow-sm transition-shadow hover:shadow-md">
-                                        <CardHeader>
+                                        <CardHeader className="py-4">
                                             <CardTitle className="flex items-center gap-2 text-lg">
                                                 <div className="rounded-lg bg-blue-100 p-2">
                                                     <User className="h-4 w-4 text-blue-600" />
                                                 </div>
-                                                Lead Customer
+                                                Select Lead Customer
                                             </CardTitle>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
+                                        <CardContent>
                                             {/* Lead Details Preview */}
                                             {selectedLeadData && (
-                                                <div className="rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
-                                                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-gray-900">
-                                                        <FileText className="h-4 w-4 text-blue-600" />
+                                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-card dark:bg-card">
+                                                    <h4 className="mb-3 flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-300">
+                                                        <FileText className="h-4 w-4 text-blue-600 dark:text-primary" />
                                                         Customer Details
                                                     </h4>
                                                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                                         <div className="flex items-start gap-2">
-                                                            <User className="mt-0.5 h-4 w-4 text-gray-500" />
+                                                            <User className="mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-300" />
                                                             <div>
-                                                                <div className="text-xs tracking-wide text-gray-500 uppercase">Name</div>
-                                                                <div className="font-medium text-gray-900">{selectedLeadData.name}</div>
+                                                                <div className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-300">
+                                                                    Name
+                                                                </div>
+                                                                <div className="font-medium text-gray-900 dark:text-gray-50">
+                                                                    {selectedLeadData.name}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-2">
-                                                            <Phone className="mt-0.5 h-4 w-4 text-gray-500" />
+                                                            <Phone className="mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-300" />
                                                             <div>
-                                                                <div className="text-xs tracking-wide text-gray-500 uppercase">Contact</div>
-                                                                <div className="font-medium text-gray-900">{selectedLeadData.contact}</div>
+                                                                <div className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-300">
+                                                                    Contact
+                                                                </div>
+                                                                <div className="font-medium text-gray-900 dark:text-gray-50">
+                                                                    {selectedLeadData.contact}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-2">
-                                                            <MapPin className="mt-0.5 h-4 w-4 text-gray-500" />
+                                                            <MapPin className="mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-300" />
                                                             <div>
-                                                                <div className="text-xs tracking-wide text-gray-500 uppercase">Address</div>
-                                                                <div className="font-medium text-gray-900">{selectedLeadData.address}</div>
+                                                                <div className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-300">
+                                                                    Address
+                                                                </div>
+                                                                <div className="font-medium text-gray-900 dark:text-gray-50">
+                                                                    {selectedLeadData.address}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-start gap-2">
-                                                            <Target className="mt-0.5 h-4 w-4 text-gray-500" />
+                                                            <Target className="mt-0.5 h-4 w-4 text-gray-500 dark:text-gray-300" />
                                                             <div>
-                                                                <div className="text-xs tracking-wide text-gray-500 uppercase">Needs</div>
-                                                                <div className="font-medium text-gray-900">{selectedLeadData.needs}</div>
+                                                                <div className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-300">
+                                                                    Needs
+                                                                </div>
+                                                                <div className="font-medium text-gray-900 dark:text-gray-50">
+                                                                    {selectedLeadData.needs}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -220,30 +229,30 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
 
                                     {/* Products Configuration */}
                                     <Card className="shadow-sm transition-shadow hover:shadow-md">
-                                        <CardHeader>
+                                        <CardHeader className="py-4">
                                             <CardTitle className="flex items-center gap-2 text-lg">
                                                 <div className="rounded-lg bg-green-100 p-2">
                                                     <Package className="h-4 w-4 text-green-600" />
                                                 </div>
-                                                List Products
+                                                List Products Selected
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             {selectedProducts.length > 0 ? (
                                                 <div className="space-y-3">
                                                     <div className="flex items-center justify-between">
-                                                        <h4 className="font-medium text-gray-900">Selected Products</h4>
+                                                        <h4 className="font-medium text-gray-900 dark:text-gray-300">Selected Products</h4>
                                                         <Badge variant="secondary" className="bg-green-100 text-green-800">
                                                             {selectedProducts.length} products
                                                         </Badge>
                                                     </div>
 
-                                                    <ScrollArea className="h-[300px] pr-4">
+                                                    <ScrollArea className="h-[300px]">
                                                         <div className="space-y-3">
                                                             {selectedProducts.map((product, index) => (
                                                                 <div
                                                                     key={product.id_product}
-                                                                    className="rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50"
+                                                                    className="rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 dark:border-muted-foreground dark:bg-card"
                                                                 >
                                                                     <div className="mb-3 flex items-center justify-between">
                                                                         <div className="flex items-center gap-3">
@@ -251,8 +260,10 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                                                 {index + 1}
                                                                             </div>
                                                                             <div>
-                                                                                <h5 className="font-medium text-gray-900">{product.name}</h5>
-                                                                                <p className="text-sm text-gray-500">
+                                                                                <h5 className="font-medium text-gray-900 dark:text-gray-50">
+                                                                                    {product.name}
+                                                                                </h5>
+                                                                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                                                                     Base price: {formatCurrency(product.price)}
                                                                                 </p>
                                                                             </div>
@@ -262,15 +273,15 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                                             variant="ghost"
                                                                             size="sm"
                                                                             onClick={() => removeProduct(product.id_product)}
-                                                                            className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                                                                            className="text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-500 dark:hover:bg-red-950"
                                                                         >
                                                                             <Trash2 className="h-4 w-4" />
                                                                         </Button>
                                                                     </div>
 
-                                                                    <div className="grid grid-cols-3 gap-3">
-                                                                        <div>
-                                                                            <Label className="mb-1 block text-xs font-medium text-gray-700">
+                                                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                                                                        <div className="col-span-1">
+                                                                            <Label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-200">
                                                                                 Quantity
                                                                             </Label>
                                                                             <Input
@@ -287,8 +298,8 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                                                 className="text-sm"
                                                                             />
                                                                         </div>
-                                                                        <div>
-                                                                            <Label className="mb-1 block text-xs font-medium text-gray-700">
+                                                                        <div className="">
+                                                                            <Label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-200">
                                                                                 Unit Price
                                                                             </Label>
                                                                             <Input
@@ -306,10 +317,10 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                                             />
                                                                         </div>
                                                                         <div>
-                                                                            <Label className="mb-1 block text-xs font-medium text-gray-700">
+                                                                            <Label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-200">
                                                                                 Subtotal
                                                                             </Label>
-                                                                            <div className="rounded-md border bg-gray-50 px-3 py-2 text-sm font-semibold text-green-600">
+                                                                            <div className="rounded-md border bg-gray-50 px-3 py-2 text-sm font-semibold text-green-600 dark:bg-card">
                                                                                 {formatCurrency(productDetails[product.id_product]?.subtotal || 0)}
                                                                             </div>
                                                                         </div>
@@ -349,98 +360,45 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                             {/* Add Products */}
                                             {availableProducts.length > 0 && (
                                                 <div className="border-t pt-4">
-                                                    <Label className="mb-3 block text-sm font-medium text-gray-700">
+                                                    <Label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
                                                         Available Products ({availableProducts.length})
                                                     </Label>
-                                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                                        {availableProducts.map((product) => (
-                                                            <Button
-                                                                key={product.id_product}
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={() => addProduct(product)}
-                                                                className="h-auto justify-start p-3 text-left hover:border-green-300 hover:bg-green-50"
-                                                            >
-                                                                <Plus className="mr-2 h-4 w-4 flex-shrink-0" />
-                                                                <div>
-                                                                    <div className="text-sm font-medium">{product.name}</div>
-                                                                    <div className="text-xs text-gray-500">{formatCurrency(product.price)}</div>
-                                                                </div>
-                                                            </Button>
-                                                        ))}
-                                                    </div>
+                                                    <ScrollArea className="h-[300px]">
+                                                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+                                                            {availableProducts.map((product) => (
+                                                                <Button
+                                                                    key={product.id_product}
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => addProduct(product)}
+                                                                    className="h-auto justify-start p-3 text-left hover:border-green-300 hover:bg-green-50 dark:hover:border-green-500 dark:hover:bg-green-800"
+                                                                >
+                                                                    <Plus className="mr-2 h-4 w-4 flex-shrink-0" />
+                                                                    <div>
+                                                                        <div className="text-sm font-medium">{product.name}</div>
+                                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                                            {formatCurrency(product.price)}
+                                                                        </div>
+                                                                    </div>
+                                                                </Button>
+                                                            ))}
+                                                        </div>
+                                                    </ScrollArea>
                                                 </div>
                                             )}
-                                        </CardContent>
-                                    </Card>
-
-                                    {/* Project Status */}
-                                    <Card className="shadow-sm transition-shadow hover:shadow-md">
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2 text-lg">
-                                                <div className="rounded-lg bg-purple-100 p-2">
-                                                    <CheckCircle className="h-4 w-4 text-purple-600" />
-                                                </div>
-                                                Update Project Status
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            <div>
-                                                <Label htmlFor="status" className="text-sm font-medium text-gray-700">
-                                                    Project Status *
-                                                </Label>
-                                                <Select name="status" defaultValue={project.status}>
-                                                    <SelectTrigger className="mt-1">
-                                                        <SelectValue placeholder="-- Select project status --" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="waiting">
-                                                            <div className="flex items-center gap-3 py-1">
-                                                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
-                                                                    <CheckCircle className="h-3 w-3 text-yellow-600" />
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-medium text-gray-900">Waiting Approval</div>
-                                                                    <div className="text-xs text-gray-500">Project awaiting approval</div>
-                                                                </div>
-                                                            </div>
-                                                        </SelectItem>
-                                                        <SelectItem value="approved">
-                                                            <div className="flex items-center gap-3 py-1">
-                                                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
-                                                                    <CheckCircle className="h-3 w-3 text-green-600" />
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-medium text-gray-900">Approved</div>
-                                                                    <div className="text-xs text-gray-500">Project has been approved</div>
-                                                                </div>
-                                                            </div>
-                                                        </SelectItem>
-                                                        <SelectItem value="rejected">
-                                                            <div className="flex items-center gap-3 py-1">
-                                                                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
-                                                                    <CheckCircle className="h-3 w-3 text-red-600" />
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-medium text-gray-900">Rejected</div>
-                                                                    <div className="text-xs text-gray-500">Project has been rejected</div>
-                                                                </div>
-                                                            </div>
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
                                         </CardContent>
                                     </Card>
                                 </div>
 
                                 {/* Right Column - Summary Sidebar */}
-                                <div className="lg:col-span-1">
+                                <div className="col-span-1 lg:col-span-1">
                                     <Card className="border-2 p-0 shadow-lg">
-                                        <CardHeader className="rounded-t-lg bg-gradient-to-r from-primary to-blue-700 p-4 text-white">
-                                            <CardTitle className="flex items-center gap-2">
-                                                <Calculator className="h-5 w-5" />
+                                        <CardHeader className="rounded-t-lg bg-card p-4 ">
+                                            <CardTitle className="flex items-center gap-2 text-lg">
+                                                <div className="rounded-lg bg-amber-100 p-2">
+                                                    <Calculator className="h-4 w-4 text-amber-600" />
+                                                </div>
                                                 Project Summary
                                             </CardTitle>
                                         </CardHeader>
@@ -449,9 +407,11 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                 {/* Project Info */}
                                                 <div>
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Project Info</div>
-                                                    <div className="rounded-lg bg-gray-50 p-3">
-                                                        <div className="font-medium text-gray-900">Project #{project.id_project}</div>
-                                                        <div className="text-sm text-gray-600">
+                                                    <div className="rounded-lg dark:bg-card">
+                                                        <div className="font-medium text-gray-900 dark:text-gray-300">
+                                                            Project #{project.id_project}
+                                                        </div>
+                                                        <div className="text-sm text-gray-600 dark:text-gray-500">
                                                             Original Amount: {formatCurrency(project.total_price)}
                                                         </div>
                                                     </div>
@@ -463,12 +423,16 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                 <div>
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Customer</div>
                                                     {selectedLeadData ? (
-                                                        <div className="rounded-lg bg-blue-50 p-3">
-                                                            <div className="font-medium text-gray-900">{selectedLeadData.name}</div>
-                                                            <div className="text-sm text-gray-600">{selectedLeadData.contact}</div>
+                                                        <div className="rounded-lg  dark:bg-card">
+                                                            <div className="font-medium text-gray-900 dark:text-gray-300">
+                                                                {selectedLeadData.name}
+                                                            </div>
+                                                            <div className="text-sm text-gray-600 dark:text-gray-500">{selectedLeadData.contact}</div>
                                                         </div>
                                                     ) : (
-                                                        <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-500">No customer selected</div>
+                                                        <div className="rounded-lg bg-gray-50 text-sm text-gray-500 dark:bg-card dark:text-gray-300">
+                                                            No customer selected
+                                                        </div>
                                                     )}
                                                 </div>
 
@@ -478,11 +442,11 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                 <div>
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Products</div>
                                                     <div className="grid grid-cols-2 gap-3">
-                                                        <div className="rounded-lg bg-green-50 p-3 text-center">
-                                                            <div className="text-xl font-bold text-green-600">{selectedProducts.length}</div>
-                                                            <div className="text-xs text-gray-600">Types</div>
+                                                        <div className="rounded-lg text-center dark:bg-card">
+                                                            <div className="text-xl font-bold text-amber-600">{selectedProducts.length}</div>
+                                                            <div className="text-xs text-gray-600 dark:text-gray-500">Types</div>
                                                         </div>
-                                                        <div className="rounded-lg bg-blue-50 p-3 text-center">
+                                                        <div className="rounded-lg  text-center dark:bg-card">
                                                             <div className="text-xl font-bold text-blue-600">{totalItems}</div>
                                                             <div className="text-xs text-gray-600">Items</div>
                                                         </div>
@@ -494,8 +458,8 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                 {/* Total Amount */}
                                                 <div>
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Total Amount</div>
-                                                    <div className="rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 p-4 text-center">
-                                                        <div className="text-2xl font-bold text-purple-600">{formatCurrency(totalPrice)}</div>
+                                                    <div className="rounded-lg  text-center dark:border-card dark:bg-card">
+                                                        <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPrice)}</div>
                                                         <div className="mt-1 text-xs text-gray-600">Updated Value</div>
                                                         {totalPrice !== Number(project.total_price || 0) && (
                                                             <div className="mt-2 text-xs">
@@ -518,24 +482,65 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
 
                                                 {/* Status */}
                                                 <div>
-                                                    <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                                                        Current Status
-                                                    </div>
-                                                    <div className={`rounded-lg border p-3 ${currentStatusConfig.color} flex items-center gap-2`}>
-                                                        {currentStatusConfig.icon}
-                                                        <span className="font-medium">{currentStatusConfig.label}</span>
-                                                    </div>
+                                                    <Label
+                                                        htmlFor="status"
+                                                        className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase"
+                                                    >
+                                                        Project Status
+                                                    </Label>
+                                                    <Select name="status" defaultValue={project.status}>
+                                                        <SelectTrigger className="h-fit">
+                                                            <SelectValue placeholder="-- Select project status --" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="waiting">
+                                                                <div className="flex items-center gap-3 py-1">
+                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
+                                                                        <CheckCircle className="h-3 w-3 text-yellow-600" />
+                                                                    </div>
+                                                                    <div className='text-start'>
+                                                                        <div className="font-medium text-gray-900 dark:text-gray-300">
+                                                                            Waiting Approval
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-500">Project awaiting approval</div>
+                                                                    </div>
+                                                                </div>
+                                                            </SelectItem>
+                                                            <SelectItem value="approved">
+                                                                <div className="flex items-center gap-3 py-1">
+                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                                                                        <CheckCircle className="h-3 w-3 text-green-600" />
+                                                                    </div>
+                                                                    <div className='text-start'>
+                                                                        <div className="font-medium text-gray-900 dark:text-gray-300">Approved</div>
+                                                                        <div className="text-xs text-gray-500">Project has been approved</div>
+                                                                    </div>
+                                                                </div>
+                                                            </SelectItem>
+                                                            <SelectItem value="rejected">
+                                                                <div className="flex items-center gap-3 py-1">
+                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
+                                                                        <CheckCircle className="h-3 w-3 text-red-600" />
+                                                                    </div>
+                                                                    <div className='text-start'>
+                                                                        <div className="font-medium text-gray-900 dark:text-gray-300">Rejected</div>
+                                                                        <div className="text-xs text-gray-500">Project has been rejected</div>
+                                                                    </div>
+                                                                </div>
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
                                                 </div>
                                             </div>
                                         </CardContent>
                                     </Card>
 
                                     {/* Submit Button */}
-                                    <Card className="mt-4 border-2 border-blue-200">
+                                    <Card className="mt-4 ">
                                         <CardContent className="p-4">
                                             <Button
                                                 type="submit"
-                                                className="h-12 w-full bg-gradient-to-r from-blue-600 to-blue-700 text-base font-semibold hover:from-blue-700 hover:to-blue-800"
+                                                className="h-12 w-full bg-amber-500 hover:bg-amber-600 text-base font-semibold dark:text-white"
                                                 disabled={processing || !selectedLead || selectedProducts.length === 0}
                                             >
                                                 {processing ? (
@@ -561,10 +566,10 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                         </CardContent>
                                     </Card>
                                 </div>
-                            </div>
-                        </>
-                    )}
-                </Form>
+                            </>
+                        )}
+                    </Form>
+                </div>
             </div>
         </AppLayout>
     );

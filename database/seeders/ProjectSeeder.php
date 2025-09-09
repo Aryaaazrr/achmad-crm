@@ -16,13 +16,8 @@ class ProjectSeeder extends Seeder
      */
     public function run(): void
     {
-        $leads = Leads::where('status', 'deal')->get();
+        $leads = Leads::where('status', 'negotiation')->get();
         $products = Product::all();
-
-        if ($leads->isEmpty()) {
-            $this->command->warn('Tidak ada lead dengan status "deal", project tidak dibuat.');
-            return;
-        }
 
         foreach ($leads as $lead) {
             $salesId = $lead->id_user;
@@ -36,6 +31,7 @@ class ProjectSeeder extends Seeder
 
             $selectedProducts = $products->random(rand(1, 3));
             $totalPrice = 0;
+            $needApproval = false;
 
             foreach ($selectedProducts as $product) {
                 $quantity = rand(1, 5);
@@ -50,10 +46,15 @@ class ProjectSeeder extends Seeder
                     'subtotal'   => $price * $quantity,
                 ]);
 
+                if ($price < $product->price) {
+                    $needApproval = true;
+                }
             }
+
             $project->update(['total_price' => $totalPrice]);
 
-            if ($price > $product->price) {
+            if (! $needApproval) {
+                $lead->update(['status' => 'deal']);
                 $project->update(['status' => 'approved']);
             }
         }

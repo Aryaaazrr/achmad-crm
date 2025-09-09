@@ -34,8 +34,12 @@ class Project extends Model
                 if (!$exists) {
                     Customer::create([
                         'id_leads' => $project->id_lead,
+                        'customer_name' => $project->lead->name,
+                        'contact' => $project->lead->contact,
+                        'address' => $project->lead->address,
                         'status' => 'active',
                     ]);
+                    Leads::where('id_leads', $project->id_lead)->update(['status' => 'deal']);
                 }
             }
         });
@@ -46,8 +50,12 @@ class Project extends Model
                 if (!$exists) {
                     Customer::create([
                         'id_leads' => $project->id_lead,
+                        'customer_name' => $project->lead->name,
+                        'contact' => $project->lead->contact,
+                        'address' => $project->lead->address,
                         'status' => 'active',
                     ]);
+                    Leads::where('id_leads', $project->id_lead)->update(['status' => 'deal']);
                 }
             }
         });

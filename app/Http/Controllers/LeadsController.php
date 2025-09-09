@@ -15,9 +15,9 @@ class LeadsController extends Controller
     public function index()
     {
         if (Auth::user()->hasRole('sales')) {
-            $leads = Leads::with(['user:id,name'])->where('id_user', Auth::id())->latest()->get();
+            $leads = Leads::with(['user:id,name'])->where('id_user', Auth::id())->whereNot('status', 'deal')->latest()->get();
         } else {
-            $leads = Leads::with(['user:id,name'])->latest()->get();
+            $leads = Leads::with(['user:id,name'])->whereNot('status', 'deal')->latest()->get();
         }
 
         return Inertia::render('leads/index', ['leads' => $leads]);

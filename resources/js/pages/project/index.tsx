@@ -24,7 +24,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, router, usePage } from '@inertiajs/react';
+import project from '@/routes/project';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -37,7 +39,7 @@ import {
     useReactTable,
     VisibilityState,
 } from '@tanstack/react-table';
-import { ArrowUpDown, Ban, CheckCircle2Icon, ChevronDown, Info, LoaderIcon, PencilLine, Trash } from 'lucide-react';
+import { ArrowUpDown, Ban, CheckCircle2Icon, ChevronDown, Info, LoaderIcon, PencilLine, Plus, Trash2 } from 'lucide-react';
 import * as React from 'react';
 
 type User = {
@@ -65,6 +67,13 @@ type Project = {
 type Auth = {
     permissions: string[];
 };
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Project',
+        href: project.index().toString(),
+    },
+];
 
 export default function Project({ auth }: { auth: Auth }) {
     const { props } = usePage<{ project: Project[] }>();
@@ -241,7 +250,7 @@ export default function Project({ auth }: { auth: Auth }) {
                             {canCreate && (
                                 <DropdownMenuItem asChild>
                                     <Link href={destroy(project.id_project)} className="flex w-full items-center gap-2">
-                                        <Trash className="h-4 w-4" /> Delete
+                                        <Trash2 className="h-4 w-4" /> Delete
                                     </Link>
                                 </DropdownMenuItem>
                             )}
@@ -288,15 +297,20 @@ export default function Project({ auth }: { auth: Auth }) {
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Project" />
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
-                <h1 className="text-xl font-black">Project Data</h1>
+                <div>
+                    <h1 className="text-xl font-black">Project Data</h1>
+                    <small className="hidden text-muted-foreground md:flex">List of all negotiated project in the system</small>
+                </div>
                 <div className="flex gap-2">
                     {canCreate && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" disabled={table.getSelectedRowModel().rows.length === 0}>
-                                    Delete
+                                <Button disabled={table.getSelectedRowModel().rows.length === 0} className="bg-red-700 text-white hover:bg-red-800">
+                                    <Trash2 />
+                                    <span className="hidden sm:flex">Delete</span>
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -317,7 +331,10 @@ export default function Project({ auth }: { auth: Auth }) {
                     )}
                     {canCreate && (
                         <Button asChild className="cursor-pointer dark:text-white">
-                            <Link href={create()}>Create</Link>
+                            <Link href={create()}>
+                                <Plus />
+                                <span className="hidden sm:flex">Create</span>
+                            </Link>
                         </Button>
                     )}
                 </div>

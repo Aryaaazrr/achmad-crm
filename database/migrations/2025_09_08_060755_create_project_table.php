@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreign('id_user')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('status', ['waiting', 'approved', 'rejected'])->default('waiting');
             $table->decimal('total_price', 15, 2)->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

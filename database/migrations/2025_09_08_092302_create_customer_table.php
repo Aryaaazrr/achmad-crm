@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('customer', function (Blueprint $table) {
             $table->id('id_customer');
+            $table->string('customer_name');
+            $table->string('contact')->nullable();
+            $table->string('address')->nullable();
             $table->unsignedBigInteger('id_leads');
             $table->foreign('id_leads')->references('id_leads')->on('leads')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('status', ['active', 'non-active'])->default('active');

@@ -141,8 +141,7 @@ export default function LeadsCreate({ leads }: Props) {
                                         className="cursor-pointer text-white bg-amber-500 hover:bg-amber-600"
                                         disabled={processing}
                                     >
-                                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                        <SquarePen />
+                                        {processing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <SquarePen />}
                                         Update
                                     </Button>
                                 </div>

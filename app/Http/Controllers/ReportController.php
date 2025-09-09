@@ -24,27 +24,14 @@ class ReportController extends Controller
             ->with('user')
             ->get();
 
-        $customers = Customer::whereBetween('created_at', [$startDate, $endDate])
-            ->with('lead')
-            ->get();
-
         $projects = Project::whereBetween('created_at', [$startDate, $endDate])
             ->with(['lead', 'detail_project.product'])
             ->get();
 
         return Inertia::render('report/index', [
             'leads' => $leads,
-            'customers' => $customers,
             'projects' => $projects,
             'filters' => compact('startDate', 'endDate')
         ]);
-    }
-
-    public function export(Request $request)
-    {
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-
-        return Excel::download(new ProjectReportExport($startDate, $endDate), 'report.xlsx');
     }
 }

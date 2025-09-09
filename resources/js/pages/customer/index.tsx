@@ -13,7 +13,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Link, usePage } from '@inertiajs/react';
+import customer from '@/routes/customer';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -29,9 +31,15 @@ import {
 import { ArrowUpDown, ChevronDown, Info, UserCheck, UserX } from 'lucide-react';
 import * as React from 'react';
 
+type User = {
+    id: number;
+    name: string;
+};
+
 type Lead = {
     id_leads: number;
     name: string;
+    user?: User;
 };
 
 type Customer = {
@@ -42,6 +50,13 @@ type Customer = {
     updated_at: string;
     lead?: Lead;
 };
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Customer',
+        href: customer.index().url,
+    },
+];
 
 export default function Customer() {
     const { props } = usePage<{ customer: Customer[] }>();
@@ -96,17 +111,17 @@ export default function Customer() {
             },
         },
         {
-            accessorKey: 'id_leads',
+            accessorKey: 'sales_name',
             header: ({ column }) => (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
                     className="mx-auto flex items-center gap-2"
                 >
-                    Lead ID <ArrowUpDown />
+                    Sales <ArrowUpDown />
                 </Button>
             ),
-            cell: ({ row }) => <div className="text-center">#{row.getValue('id_leads')}</div>,
+            cell: ({ row }) => <div className="text-center">{row.original.lead?.user?.name ?? '-'}</div>,
         },
         {
             accessorKey: 'status',
@@ -237,10 +252,12 @@ export default function Customer() {
     const totalCustomers = localCustomers.length;
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title='Customer'></Head>
             <div className="mx-6 flex h-20 items-center justify-between rounded-xl">
                 <div>
-                    <h1 className="text-xl font-black">Customer Data</h1>
+                    <h1 className="text-lg font-black sm:text-xl">Customer Data</h1>
+                    <small className="hidden text-muted-foreground sm:flex">List of all registered customer in the system</small>
                 </div>
                 <div className="flex gap-2">
                     <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">

@@ -120,8 +120,7 @@ export default function LeadsCreate({ leads }: Props) {
                                         </Link>
                                     </Button>
                                     <Button type="submit" tabIndex={5} className="cursor-pointer text-white" disabled={processing}>
-                                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                        <Send />
+                                        {processing ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Send />}
                                         Submit
                                     </Button>
                                 </div>

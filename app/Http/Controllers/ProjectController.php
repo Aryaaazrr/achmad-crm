@@ -32,7 +32,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $leads = Leads::with('project')->where('id_user', Auth::id())->where('status', 'deal')->whereDoesntHave('project')->get();
+        $leads = Leads::with('project')->where('id_user', Auth::id())->where('status', 'negotiation')->whereDoesntHave('project')->get();
         $products = Product::all();
 
         return Inertia::render('project/create', ['leads' => $leads, 'products' => $products]);
@@ -112,9 +112,12 @@ class ProjectController extends Controller
     public function show(string $id)
     {
         $project = Project::with('detail_project')->findOrFail($id);
-        $leads = Leads::where('id_user', Auth::id())
-            ->where('status', 'deal')
-            ->get();
+        if (Auth::user()->hasRole('sales')) {
+            $leads = Leads::where('id_user', Auth::id())
+                ->get();
+        } else {
+            $leads = Leads::get();
+        }
 
         $products = Product::all();
 
@@ -147,9 +150,12 @@ class ProjectController extends Controller
     public function edit(string $id)
     {
         $project = Project::with('detail_project')->findOrFail($id);
-        $leads = Leads::where('id_user', Auth::id())
-            ->where('status', 'deal')
-            ->get();
+         if (Auth::user()->hasRole('sales')) {
+            $leads = Leads::where('id_user', Auth::id())
+                ->get();
+        } else {
+            $leads = Leads::get();
+        }
 
         $products = Product::all();
 
