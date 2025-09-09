@@ -17,7 +17,17 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customer = Customer::with(['lead.user'])->latest()->get();
+        $userId = Auth::id();
+
+        if (Auth::user()->hasRole('sales')) {
+            $customer = Customer::whereHas('lead', function ($query) use ($userId) {
+                $query->where('id_user', $userId);
+                    })->with('lead.user')
+                ->latest()
+                ->get();
+        } else {
+            $customer = Customer::with(['lead.user'])->latest()->get();
+        }
 
         return Inertia::render('customer/index', ['customer' => $customer]);
     }

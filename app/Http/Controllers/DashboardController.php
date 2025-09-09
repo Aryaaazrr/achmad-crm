@@ -73,6 +73,57 @@ class DashboardController extends Controller
 
                 $approved_delta = $this->calculateDelta($project_approved, $last_month_approved);
 
+                // total product
+                $total_product = Product::count();
+                $last_month_product = Product::whereBetween('created_at', [
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                    ])
+                    ->count();
+                $product_delta = $this->calculateDelta($total_product, $last_month_product);
+
+                // top user
+                $total_user = User::count();
+                $last_month_user = User::whereBetween('created_at', [
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                    ])
+                    ->count();
+                $user_delta = $this->calculateDelta($total_user, $last_month_user);
+
+                // Revenue
+                $total_revenue = Project::where('id_user', $userId)
+                    ->where('status', 'approved')
+                    ->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth()
+                    ])
+                    ->sum('total_price');
+
+                $last_month_revenue = Project::where('id_user', $userId)
+                    ->where('status', 'approved')
+                    ->whereBetween('created_at', [
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                        ])
+                        ->sum('total_price');
+
+                $revenue_delta = $this->calculateDelta($total_revenue, $last_month_revenue);
+
+                // cancel
+                $leads_cancel = Leads::where('id_user', $userId)
+                    ->where('status', 'cancel')
+                    ->count();
+
+                $last_month_cancel = Leads::where('status', 'cancel')
+                    ->whereBetween('created_at', [
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth()
+                    ])
+                    ->count();
+
+                $cancel_delta = $this->calculateDelta($leads_cancel, $last_month_cancel);
+
                 $chartData = $this->getChartData($userId);
                 $cardActivity = $this->getCardActivityData($userId);
             } else {

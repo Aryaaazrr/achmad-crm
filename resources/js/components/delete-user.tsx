@@ -22,7 +22,7 @@ export default function DeleteUser() {
 
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button variant="destructive" className="text-white dark:text-red-400">
+                        <Button variant="destructive" className="text-white">
                             Delete account
                         </Button>
                     </DialogTrigger>
@@ -68,8 +68,8 @@ export default function DeleteUser() {
                                             </Button>
                                         </DialogClose>
 
-                                        <Button variant="destructive" disabled={processing} asChild>
-                                            <button type="submit" className="text-white dark:text-red-400">Delete account</button>
+                                        <Button variant={'destructive'} disabled={processing} asChild>
+                                            <button type="submit" className="text-white">Delete account</button>
                                         </Button>
                                     </DialogFooter>
                                 </>

@@ -15,7 +15,7 @@ interface Stat {
 }
 
 function formatNumber(n: number) {
-    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + ' M';
     if (n >= 1_000) return n.toLocaleString();
     return n.toString();
 }
@@ -32,7 +32,7 @@ export default function CardStatistic({ stats }: { stats: Stat[] }) {
                         <CardContent className="space-y-2.5">
                             <div className="flex items-center gap-2.5">
                                 <span className="text-2xl font-medium tracking-tight text-foreground">
-                                    {stat.format ? stat.format(stat.value) : `${stat.prefix || ''}${formatNumber(stat.value)}${stat.suffix || ''}`}
+                                    {stat.format ? stat.format(stat.value) : `${stat.prefix || ''}${(stat.value)}${stat.suffix || ''}`}
                                 </span>
                                 {stat.delta !== null && stat.delta !== undefined && (
                                     <Badge variant={stat.positive ? 'success' : 'destructive'} appearance="light">
