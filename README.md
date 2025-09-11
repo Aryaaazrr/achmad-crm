@@ -91,7 +91,7 @@ composer run dev
 
 ## 🔗 Link Demo 
 
- `https://achmad-crm-master-mucftg.laravel.cloud/login`
+ `https://achmad-crm-master-gkrdeg.laravel.cloud/login`
 
 ## 🚀 Cara Penggunaan
 
