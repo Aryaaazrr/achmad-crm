@@ -185,43 +185,77 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        $project = Project::findOrFail($id);
-
         $request->validate([
             'id_lead' => 'required|exists:leads,id_leads',
             'products' => 'required|array|min:1',
-            'products.*.id_product' => 'required|exists:product,id_product',
             'products.*.quantity' => 'required|integer|min:1',
             'products.*.price' => 'required|numeric|min:0',
-            'status' => 'required|in:waiting,approved,rejected',
+            'status' => 'nullable|in:waiting,approved,rejected',
         ]);
+
+        $products = array_filter($request->products, fn($p) => !is_null($p));
+
+        $productIds = array_map(fn($p) => $p['id_product'], $products);
+        $validProductIds = Product::whereIn('id_product', $productIds)->pluck('id_product')->toArray();
+
+        if (count($productIds) !== count($validProductIds)) {
+            return back()->with('error', 'One or more products are invalid.');
+        }
 
         $totalPrice = 0;
-        foreach ($request->products as $productData) {
-            $totalPrice += $productData['quantity'] * $productData['price'];
+        $status = 'approved';
+
+        foreach ($products as $productData) {
+            $product = Product::find($productData['id_product']);
+
+            $subtotal = $productData['quantity'] * $productData['price'];
+            $totalPrice += $subtotal;
+
+            if ($productData['price'] < $product->price) {
+                $status = 'waiting';
+            }
         }
 
-        $project->update([
-            'id_lead' => $request->id_lead,
-            'total_price' => $totalPrice,
-            'status' => $request->status,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $project->detail_project()->delete();
+            $project = Project::findOrFail($id);
 
-        foreach ($request->products as $productData) {
-            $project->detail_project()->create([
-                'id_product' => $productData['id_product'],
-                'quantity' => $productData['quantity'],
-                'price' => $productData['price'],
-                'subtotal' => $productData['quantity'] * $productData['price'],
+            if (Auth::user()->hasRole('manager')) {
+                $status = $request->status;
+            }
+
+            $project->update([
+                'id_lead' => $request->id_lead,
+                'status' => $status,
+                'total_price' => $totalPrice,
             ]);
-        }
 
-        return redirect()->route('project.index')
-            ->with('success', 'Project updated successfully');
+            DetailProject::where('id_project', $project->id_project)->delete();
+
+            foreach ($products as $productData) {
+                DetailProject::create([
+                    'id_project' => $project->id_project,
+                    'id_product' => $productData['id_product'],
+                    'quantity' => $productData['quantity'],
+                    'price' => $productData['price'],
+                    'subtotal' => $productData['quantity'] * $productData['price'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('project.index')
+                ->with('success', "Project updated successfully with status: {$status}");
+
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            return back()->with('error', 'Failed to update project. Please try again.')
+                        ->withInput();
+        }
     }
 
     /**

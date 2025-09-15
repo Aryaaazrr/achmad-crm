@@ -28,34 +28,62 @@ class Project extends Model
     protected static function booted()
     {
         static::created(function ($project) {
-            if ($project->isDirty('status') && $project->status === 'approved') {
-                $exists = Customer::where('id_leads', $project->id_lead)->exists();
+            if ($project->status === 'approved') {
+                $lead = $project->lead;
 
-                if (!$exists) {
+                if ($lead && !$lead->customer) {
                     Customer::create([
-                        'id_leads' => $project->id_lead,
-                        'customer_name' => $project->lead->name,
-                        'contact' => $project->lead->contact,
-                        'address' => $project->lead->address,
-                        'status' => 'active',
+                        'id_leads'      => $lead->id_leads,
+                        'customer_name' => $lead->name,
+                        'contact'       => $lead->contact,
+                        'address'       => $lead->address,
+                        'status'        => 'active',
                     ]);
-                    Leads::where('id_leads', $project->id_lead)->update(['status' => 'deal']);
+
+                    $lead->update(['status' => 'deal']);
                 }
             }
         });
-        static::updated(function ($project) {
-            if ($project->isDirty('status') && $project->status === 'approved') {
-                $exists = Customer::where('id_leads', $project->id_lead)->exists();
 
-                if (!$exists) {
+        static::updated(function ($project) {
+            $lead = $project->lead;
+
+            if (!$lead) return;
+
+            if ($project->isDirty('status') && $project->status === 'approved') {
+                if (!$lead->customer) {
                     Customer::create([
-                        'id_leads' => $project->id_lead,
-                        'customer_name' => $project->lead->name,
-                        'contact' => $project->lead->contact,
-                        'address' => $project->lead->address,
-                        'status' => 'active',
+                        'id_leads'      => $lead->id_leads,
+                        'customer_name' => $lead->name,
+                        'contact'       => $lead->contact,
+                        'address'       => $lead->address,
+                        'status'        => 'active',
                     ]);
-                    Leads::where('id_leads', $project->id_lead)->update(['status' => 'deal']);
+                }
+
+                $lead->update(['status' => 'deal']);
+            }
+
+            if ($project->isDirty('status') && $project->status !== 'approved') {
+                if ($lead->customer) {
+                    $lead->customer->delete();
+                }
+                if ($project->status === 'waiting') {
+                    $lead->update(['status' => 'negotiation']);
+                } else {
+                    $lead->update(['status' => 'cancel']);
+                }
+            }
+        });
+
+        static::deleted(function ($project) {
+            $lead = $project->lead;
+
+            if ($lead) {
+                $lead->update(['status' => 'negotiation']);
+
+                if ($lead->customer) {
+                    $lead->customer->delete();
                 }
             }
         });

@@ -61,7 +61,12 @@ interface Props {
     leads: Lead[];
     products: Product[];
     detailProducts: { [key: number]: ProductDetail };
+    auth: Auth;
 }
+
+type Auth = {
+    roles: string[];
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -74,10 +79,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function ProjectEdit({ project, leads, products, detailProducts }: Props) {
+export default function ProjectEdit({ project, leads, products, detailProducts, auth }: Props) {
     const [selectedLead] = React.useState(project.id_lead.toString());
     const [selectedLeadData, setSelectedLeadData] = React.useState<Lead | null>(null);
     const [productDetails, setProductDetails] = React.useState<{ [key: number]: ProductDetail }>(detailProducts);
+    const isManager = auth.roles.includes('manager');
 
     React.useEffect(() => {
         const lead = leads.find((l) => l.id_leads.toString() === selectedLead);
@@ -394,7 +400,7 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                 {/* Right Column - Summary Sidebar */}
                                 <div className="col-span-1 lg:col-span-1">
                                     <Card className="border-2 p-0 shadow-lg">
-                                        <CardHeader className="rounded-t-lg bg-card p-4 ">
+                                        <CardHeader className="rounded-t-lg bg-card p-4">
                                             <CardTitle className="flex items-center gap-2 text-lg">
                                                 <div className="rounded-lg bg-amber-100 p-2">
                                                     <Calculator className="h-4 w-4 text-amber-600" />
@@ -423,7 +429,7 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                 <div>
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Customer</div>
                                                     {selectedLeadData ? (
-                                                        <div className="rounded-lg  dark:bg-card">
+                                                        <div className="rounded-lg dark:bg-card">
                                                             <div className="font-medium text-gray-900 dark:text-gray-300">
                                                                 {selectedLeadData.name}
                                                             </div>
@@ -446,7 +452,7 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                             <div className="text-xl font-bold text-amber-600">{selectedProducts.length}</div>
                                                             <div className="text-xs text-gray-600 dark:text-gray-500">Types</div>
                                                         </div>
-                                                        <div className="rounded-lg  text-center dark:bg-card">
+                                                        <div className="rounded-lg text-center dark:bg-card">
                                                             <div className="text-xl font-bold text-blue-600">{totalItems}</div>
                                                             <div className="text-xs text-gray-600">Items</div>
                                                         </div>
@@ -458,7 +464,7 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                 {/* Total Amount */}
                                                 <div>
                                                     <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Total Amount</div>
-                                                    <div className="rounded-lg  text-center dark:border-card dark:bg-card">
+                                                    <div className="rounded-lg text-center dark:border-card dark:bg-card">
                                                         <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPrice)}</div>
                                                         <div className="mt-1 text-xs text-gray-600">Updated Value</div>
                                                         {totalPrice !== Number(project.total_price || 0) && (
@@ -478,69 +484,79 @@ export default function ProjectEdit({ project, leads, products, detailProducts }
                                                     </div>
                                                 </div>
 
-                                                <Separator />
+                                                {isManager ? (
+                                                    <>
+                                                        <Separator />
 
-                                                {/* Status */}
-                                                <div>
-                                                    <Label
-                                                        htmlFor="status"
-                                                        className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase"
-                                                    >
-                                                        Project Status
-                                                    </Label>
-                                                    <Select name="status" defaultValue={project.status}>
-                                                        <SelectTrigger className="h-fit">
-                                                            <SelectValue placeholder="-- Select project status --" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="waiting">
-                                                                <div className="flex items-center gap-3 py-1">
-                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
-                                                                        <CheckCircle className="h-3 w-3 text-yellow-600" />
-                                                                    </div>
-                                                                    <div className='text-start'>
-                                                                        <div className="font-medium text-gray-900 dark:text-gray-300">
-                                                                            Waiting Approval
+                                                        {/* Status */}
+                                                        <div>
+                                                            <Label
+                                                                htmlFor="status"
+                                                                className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase"
+                                                            >
+                                                                Project Status
+                                                            </Label>
+                                                            <Select name="status" defaultValue={project.status}>
+                                                                <SelectTrigger className="h-fit">
+                                                                    <SelectValue placeholder="-- Select project status --" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="waiting">
+                                                                        <div className="flex items-center gap-3 py-1">
+                                                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-yellow-100">
+                                                                                <CheckCircle className="h-3 w-3 text-yellow-600" />
+                                                                            </div>
+                                                                            <div className="text-start">
+                                                                                <div className="font-medium text-gray-900 dark:text-gray-300">
+                                                                                    Waiting Approval
+                                                                                </div>
+                                                                                <div className="text-xs text-gray-500">Project awaiting approval</div>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="text-xs text-gray-500">Project awaiting approval</div>
-                                                                    </div>
-                                                                </div>
-                                                            </SelectItem>
-                                                            <SelectItem value="approved">
-                                                                <div className="flex items-center gap-3 py-1">
-                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
-                                                                        <CheckCircle className="h-3 w-3 text-green-600" />
-                                                                    </div>
-                                                                    <div className='text-start'>
-                                                                        <div className="font-medium text-gray-900 dark:text-gray-300">Approved</div>
-                                                                        <div className="text-xs text-gray-500">Project has been approved</div>
-                                                                    </div>
-                                                                </div>
-                                                            </SelectItem>
-                                                            <SelectItem value="rejected">
-                                                                <div className="flex items-center gap-3 py-1">
-                                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
-                                                                        <CheckCircle className="h-3 w-3 text-red-600" />
-                                                                    </div>
-                                                                    <div className='text-start'>
-                                                                        <div className="font-medium text-gray-900 dark:text-gray-300">Rejected</div>
-                                                                        <div className="text-xs text-gray-500">Project has been rejected</div>
-                                                                    </div>
-                                                                </div>
-                                                            </SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
+                                                                    </SelectItem>
+                                                                    <SelectItem value="approved">
+                                                                        <div className="flex items-center gap-3 py-1">
+                                                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100">
+                                                                                <CheckCircle className="h-3 w-3 text-green-600" />
+                                                                            </div>
+                                                                            <div className="text-start">
+                                                                                <div className="font-medium text-gray-900 dark:text-gray-300">
+                                                                                    Approved
+                                                                                </div>
+                                                                                <div className="text-xs text-gray-500">Project has been approved</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                    <SelectItem value="rejected">
+                                                                        <div className="flex items-center gap-3 py-1">
+                                                                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100">
+                                                                                <CheckCircle className="h-3 w-3 text-red-600" />
+                                                                            </div>
+                                                                            <div className="text-start">
+                                                                                <div className="font-medium text-gray-900 dark:text-gray-300">
+                                                                                    Rejected
+                                                                                </div>
+                                                                                <div className="text-xs text-gray-500">Project has been rejected</div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <input type="hidden" name="status" value={project.status} />
+                                                )}
                                             </div>
                                         </CardContent>
                                     </Card>
 
                                     {/* Submit Button */}
-                                    <Card className="mt-4 ">
+                                    <Card className="mt-4">
                                         <CardContent className="p-4">
                                             <Button
                                                 type="submit"
-                                                className="h-12 w-full bg-amber-500 hover:bg-amber-600 text-base font-semibold dark:text-white"
+                                                className="h-12 w-full bg-amber-500 text-base font-semibold hover:bg-amber-600 dark:text-white"
                                                 disabled={processing || !selectedLead || selectedProducts.length === 0}
                                             >
                                                 {processing ? (
